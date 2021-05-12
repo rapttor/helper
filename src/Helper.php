@@ -602,62 +602,6 @@ class Helper extends \Controller
     }
 
 
-    public function btnEdit($obj, $params = array())
-    {
-        $objClass = get_class($obj);
-        $class = (isset($params["class"])) ? $params["class"] : "pull-right";
-        $check = (isset($params["check"])) ? $params["check"] : true;
-        $showTitle = (isset($params["btnTitle"])) ? true : false;
-        $canEdit = true;
-        if ($check) $canEdit = $this->canEdit();
-        if ($canEdit) {
-            $title = false;
-            $url = $this->linkEdit($obj);
-            if (is_object($obj)) {
-                $title = ((property_exists($obj, "title")) ? $obj->title : $objClass);
-            } else if (is_array($obj) && isset($obj["class"])) {
-                $title = $obj["class"];
-            } else if (is_string($obj)) $title = $obj;
-            $title = (isset($params["btnTitle"])) ? $params["btnTitle"] : $title;
-            if (!$showTitle) $title = "";
-            return '<a class="btn btn-edit btn-link ' . $class . '" href="' . $url . '">
-                    <i class="la la-pencil"></i> 
-                    <span class="title">' . $title . '</span>
-                </a>';
-        }
-        return "";
-    }
-
-    public function btnView($obj, $class = "pull-right", $check = true)
-    {
-        $url = $this->linkView($obj);
-        $title = (property_exists($obj, "title")) ? $obj->title : get_class($obj);
-        return '<a class="btn btn-edit btn-link ' . $class . '" href="' . $url . '">
-                    <i class="la la-pencil"></i> 
-                    <span class="title">' . $title . '</span>
-                </a>';
-    }
-
-    public function btnAdd($type, $params = array())
-    {
-        if (is_object($type))
-            $type = strtolower(get_class($type));
-
-        $class = (isset($params["class"])) ? $params["class"] : "pull-right";
-        $check = (isset($params["check"])) ? $params["check"] : true;
-        $title = (isset($params["btnTitle"])) ? $params["btnTitle"] : 'Add ' . $type;
-        $canEdit = true;
-        if ($check) $canEdit = $this->canEdit();
-        if ($canEdit) {
-            $url = $this->linkAdd($type, $params);
-            return '<a title="' . $title . '" class="btn btn-edit btn-link ' . $class . '" href="' . $url . '">
-                    <i class="la la-plus"></i> 
-                    <span class="title">' . $title . '</span>
-                </a>';
-        }
-        return "";
-    }
-
     public static function debug($message, $type = "info", $value = null)
     {
         global $RapTToR_HELPER;
@@ -706,5 +650,408 @@ class Helper extends \Controller
             call_user_func($callback, $data);
         }
         if ($close) fclose($filehandle);
+    }
+
+
+    public static function imageCreateFromAny($filename)
+    {
+        if (!file_exists($filename)) {
+            // throw new InvalidArgumentException('File "' . $filename . '" not found.');
+            return false;
+        }
+        switch (strtolower(pathinfo($filename, PATHINFO_EXTENSION))) {
+            case 'jpeg':
+            case 'jpg':
+                return imagecreatefromjpeg($filename);
+                break;
+
+            case 'png':
+                return imagecreatefrompng($filename);
+                break;
+
+            case 'gif':
+                return imagecreatefromgif($filename);
+                break;
+
+            default:
+                throw new Exception('File "' . $filename . '" is not valid jpg, png or gif image.');
+                break;
+        }
+    }
+
+    public static function exceptions_error_handler($severity, $message, $filename, $lineno)
+    {
+        throw new ErrorException($message, 0, $severity, $filename, $lineno);
+    }
+
+    // set_error_handler('exceptions_error_handler');
+
+    public static function createThumb($src, $dest, $desired_height)
+    {
+        /* read the source image */
+        $source_image = self::imageCreateFromAny($src);
+        if ($source_image) {
+            $width = imagesx($source_image);
+            $height = imagesy($source_image);
+            /* find the "desired height" of this thumbnail, relative to the desired width  */
+            $desired_width = floor($width * ($desired_height / $height));
+            /* create a new, "virtual" image */
+            $virtual_image = imagecreatetruecolor($desired_width, $desired_height);
+            /* copy source image at a resized size */
+            imagecopyresized($virtual_image, $source_image, 0, 0, 0, 0, $desired_width, $desired_height, $width, $height);
+            //    imageantialias($virtual_image, true); //enose PHP ei toeta seda
+            /* create the physical thumbnail image to its destination */
+            imagejpeg($virtual_image, $dest);
+        }
+    }
+
+    public static function array0($title = "None selected", $id = 0)
+    {
+        return array($id => $title);
+    }
+
+    public static function metaKey($value, $table = "item")
+    {
+        return $table . "_" . $value;
+    }
+
+    /**
+     * @param array $values
+     * @return array 
+     */
+    public static function arrWithValues($value)
+    {
+        $arr = (array)$value;
+        $result = array();
+        foreach ($arr as $key => $v) {
+            $temp = json_encode($v);
+            if (strlen($temp) > 2 && $temp !== "null") {
+                $result[$key] = $v;
+                if ((int)$v == $v && is_numeric($v)) $result[$key] = (int)$v;
+                if ((float)$v == $v && is_numeric($v)) $result[$key] = (float)$v;
+            }
+        }
+        return $result;
+    }
+
+
+    /**
+     * @param $pass
+     * @return string
+     */
+    public static function encryptPassword($pass)
+    {
+        return sha1($pass);
+    }
+
+
+    /**
+     * Build json status
+     * @param $status
+     * @param string $message
+     * @return array
+     */
+    public static function jsonStatus($status = "OK", $message = "")
+    {
+        return array("status" => $status, "message" => $message);
+    }
+
+
+    // for criteria, ids to get for processing.
+    public static function None($title = "None selected")
+    {
+        return array(0 => $title);
+    }
+
+
+
+
+    public static function unitsList()
+    {
+        $result = array();
+        $units = self::unitsOfMeasurement();
+        foreach ($units as $k => $u) {
+            $result[$k] = array();
+            foreach ($u as $ku => $kv)
+                $result[$k][$ku] = $kv["title"];
+        }
+        return $result;
+    }
+
+    // system root
+    public static function base()
+    {
+        return dirname(__FILE__);
+    }
+
+    // translate service
+    public static function t($section, $text, $language = "en")
+    {
+        $base = self::base();
+        $filename = $base . '/languages/' . $language . '/' . $section . '.json';
+        if (is_file($filename)) {
+            $lang = json_decode($filename, true);
+            if (isset($lang[$text]))
+                $text = $lang[$text];
+        }
+        return $text;
+    }
+
+    public static function unitsOfMeasurement()
+    {
+        $units = array(
+            self::t('front', "Units volume") => array(
+                101 => array("title" => self::t('front', "Liter"), "value" => 1),
+                102 => array("title" => self::t('front', "Gallon UK"), "value" => 4.54609),
+                103 => array("title" => self::t('front', "Gallon US"), "value" => 3.78541),
+                104 => array("title" => self::t('front', "m3"), "value" => 1),
+            ),
+            self::t('front', "Units length") => array(
+                201 => array("title" => self::t('front', "Centimeter"), "value" => 0.01),
+                202 => array("title" => self::t('front', "Millimeter"), "value" => 0.001),
+                203 => array("title" => self::t('front', "Meter"), "value" => 1),
+                204 => array("title" => self::t('front', "Yard"), "value" => 0.9144),
+                205 => array("title" => self::t('front', "Inch"), "value" => 0.0254),
+                206 => array("title" => self::t('front', "Feet"), "value" => 0.3048),
+                207 => array("title" => self::t('front', "Kilometre"), "value" => 1000),
+                208 => array("title" => self::t('front', "Mile"), "value" => 1609.34),
+                209 => array("title" => self::t('front', "Nautical mile"), "value" => 1852),
+            ),
+            self::t('front', "Units weight") => array(
+                301 => array("title" => self::t('front', "Kilogram"), "value" => 1),
+                302 => array("title" => self::t('front', "Kilogram"), "value" => 1),
+                303 => array("title" => self::t('front', "Tonne"), "value" => 1000),
+                304 => array("title" => self::t('front', "UK Tonn"), "value" => 1016.05),
+                305 => array("title" => self::t('front', "US Tonn"), "value" => 907.185),
+                306 => array("title" => self::t('front', "Pound"), "value" => 0.453592),
+                307 => array("title" => self::t('front', "Ounce"), "value" => 0.0283495),
+            )
+        );
+        return $units;
+    }
+
+    public static function exec($cmd)
+    {
+        $result = array();
+        $cmd = escapeshellcmd($cmd);
+        ob_start();
+        $result["output"] = shell_exec($cmd);
+        $result["content"] = ob_get_contents();
+        ob_end_clean(); //Use this instead of ob_flush()
+        return $result;
+    }
+
+
+
+    public static function cdnImage($image, $replace = array())
+    {
+        // https://cdn.statically.io/img/cdn.rapttor.com/f=auto/influencer/dashboard/uploads/companymedia/1/31.jpg
+        $with = '';
+        $img = str_ireplace($replace, $with, $image);
+        if (substr($img, 0, 4) != 'http' && substr($img, 0, 1) == '/')
+            $img = 'https://cdn.statically.io/img/cdn.rapttor.com/f=auto' . $image;
+        return $img;
+    }
+
+
+    public static function saveData($file, $json, $delete = false)
+    {
+        $cmp = gzcompress($json);
+        if ($delete) {
+            if (is_file($file)) unlink($file);
+            if (is_file($file . '.gz')) unlink($file . '.gz');
+        }
+        $okc = @file_put_contents($file . '.gz', $cmp);
+        $ok = @file_put_contents($file, $json);
+        return $okc && $ok;
+    }
+
+    public static function remoteUserId($nick = null)
+    {
+        $remoteport = self::aVal($_SERVER, "REMOTE_PORT");
+        $remoteaddr = self::aVal($_SERVER, "REMOTE_ADDR");
+        $useragent = self::aVal($_SERVER, "HTTP_USER_AGENT");
+        $combined = $remoteport . $remoteaddr . $useragent . $nick;
+        $uid = sha1($combined);
+        // echo $combined.' '.$uid;
+        return $uid;
+    }
+
+    public static function retrieveJsonPostData($map = false)
+    {
+        $rawData = file_get_contents("php://input");
+        $data = null;
+        if ($map && $rawData) {
+            $data = json_decode($rawData, true);
+            foreach ($data as $k => $v)
+                if (!isset($_REQUEST[$v])) {
+                    $_REQUEST[$k] = $v;
+                }
+            return $data;
+        }
+    }
+
+    public static function showErrors()
+    {
+        ini_set('display_errors', 1);
+        ini_set('display_startup_errors', 1);
+        error_reporting(E_ALL);
+    }
+
+    public static function SocialNetworks()
+    {
+
+        $networks = array(
+            "facebook" => array("title" => "facebook", "sign" => 'facebook', "prefix" => "https://facebook.com/"),
+            "linkedin" => array("title" => "linkedin", "sign" => 'linkedin', "prefix" => "https://linkedin.com/"),
+            "twitter" => array("title" => "twitter", "sign" => 'twitter', "prefix" => "http://twitter.com/"),
+            "instagram" => array("title" => "instagram", "sign" => 'instagram', "prefix" => "http://instagram.com/"),
+            "youtube" => array("title" => "youtube", "sign" => 'youtube', "prefix" => "http://youtube.com/"),
+            "pinterest" => array("title" => "pinterest", "sign" => 'pinterest', "prefix" => "http://pinterest.com/"),
+            "tiktok" => array("title" => "tiktok", "sign" => 'tiktok', "prefix" => "http://tiktok.com/"),
+            "twitch" => array("title" => "twitch", "sign" => 'twitch', "prefix" => "http://twitch.tv/"),
+            "soundcloud" => array("title" => "soundcloud", "sign" => 'soundcloud', "prefix" => "http://soundcloud.com/"),
+            "amliop" => array("title" => "amliop", "sign" => 'amliop', "prefix" => "http://amliop.com/"),
+            "amazon" => array("title" => "amazon", "sign" => 'amazon', "prefix" => "http://amazon.com/"),
+            "ebay" => array("title" => "ebay", "sign" => 'ebay', "prefix" => "http://ebay.com/"),
+            "linktree" => array("title" => "linktree", "sign" => 'linktree', "prefix" => "http://linktr.ee/"),
+            "shopify" => array("title" => "shopify", "sign" => 'shopify', "prefix" => "http://shopify.com/"),
+            "applestore" => array("title" => "applestore", "sign" => 'applestore', "prefix" => "http://applestore.com/"),
+            "playstore" => array("title" => "playstore", "sign" => 'playstore', "prefix" => "http://playstore.com/"),
+            "huaweistore" => array("title" => "huaweistore", "sign" => 'huaweistore', "prefix" => "http://huaweistore.com/"),
+            "venmo" => array("title" => "venmo", "sign" => 'venmo', "prefix" => "http://venmo.com/"),
+            "patreon" => array("title" => "patreon", "sign" => 'patreon', "prefix" => "http://patreon.com/"),
+            "kickstarter" => array("title" => "kickstarter", "sign" => 'kickstarter', "prefix" => "http://kickstarter.com/"),
+            "snapchat" => array("title" => "snapchat", "sign" => 'snapchat', "prefix" => "http://snapchat.com/"),
+            "whatsapp" => array("title" => "whatsapp", "sign" => 'whatsapp', "prefix" => "http://whatsapp.com/"),
+            "wechat" => array("title" => "wechat", "sign" => 'wechat', "prefix" => "http://wechat.com/"),
+            "viber" => array("title" => "viber", "sign" => 'viber', "prefix" => "http://viber.com/"),
+            "qq" => array("title" => "qq", "sign" => 'qq', "prefix" => "http://qq.com/"),
+            "qzone" => array("title" => "qzone", "sign" => 'qzone', "prefix" => "http://qzone.com/"),
+            "tumblr" => array("title" => "tumblr", "sign" => 'tumblr', "prefix" => "http://tumblr.com/"),
+            "blog" => array("title" => "blog", "sign" => 'blog', "prefix" => "http://blog.com/"),
+            "blogger" => array("title" => "blogger", "sign" => 'blogger', "prefix" => "http://blogger.com/"),
+            "reddit" => array("title" => "reddit", "sign" => 'reddit', "prefix" => "http://reddit.com/"),
+            "foursquare" => array("title" => "foursquare", "sign" => 'foursquare', "prefix" => "http://foursquare.com/"),
+            "baidu" => array("title" => "baidu", "sign" => 'baidu', "prefix" => "http://baidu.com/"),
+            "telegram" => array("title" => "telegram", "sign" => 'telegram', "prefix" => "http://telegram.com/"),
+            "medium" => array("title" => "medium", "sign" => 'medium', "prefix" => "http://medium.com/"),
+            "wordpress" => array("title" => "wordpress", "sign" => 'wordpress', "prefix" => "http://wordpress.com/"),
+        );
+        return $networks;
+    }
+
+    public static function is_mobile()
+    {
+        $is_mobile = '0';
+
+        if (preg_match('/(android|up.browser|up.link|mmp|symbian|smartphone|midp|wap|phone)/i', strtolower($_SERVER['HTTP_USER_AGENT']))) {
+            $is_mobile = 1;
+        }
+
+        if ((strpos(strtolower($_SERVER['HTTP_ACCEPT']), 'application/vnd.wap.xhtml+xml') > 0) or ((isset($_SERVER['HTTP_X_WAP_PROFILE']) or isset($_SERVER['HTTP_PROFILE'])))) {
+            $is_mobile = 1;
+        }
+
+        $mobile_ua = strtolower(substr($_SERVER['HTTP_USER_AGENT'], 0, 4));
+        $mobile_agents = array('w3c ', 'acs-', 'alav', 'alca', 'amoi', 'andr', 'audi', 'avan', 'benq', 'bird', 'blac', 'blaz', 'brew', 'cell', 'cldc', 'cmd-', 'dang', 'doco', 'eric', 'hipt', 'inno', 'ipaq', 'java', 'jigs', 'kddi', 'keji', 'leno', 'lg-c', 'lg-d', 'lg-g', 'lge-', 'maui', 'maxo', 'midp', 'mits', 'mmef', 'mobi', 'mot-', 'moto', 'mwbp', 'nec-', 'newt', 'noki', 'oper', 'palm', 'pana', 'pant', 'phil', 'play', 'port', 'prox', 'qwap', 'sage', 'sams', 'sany', 'sch-', 'sec-', 'send', 'seri', 'sgh-', 'shar', 'sie-', 'siem', 'smal', 'smar', 'sony', 'sph-', 'symb', 't-mo', 'teli', 'tim-', 'tosh', 'tsm-', 'upg1', 'upsi', 'vk-v', 'voda', 'wap-', 'wapa', 'wapi', 'wapp', 'wapr', 'webc', 'winw', 'winw', 'xda', 'xda-');
+
+        if (in_array($mobile_ua, $mobile_agents)) {
+            $is_mobile = 1;
+        }
+
+        if (isset($_SERVER['ALL_HTTP'])) {
+            if (strpos(strtolower($_SERVER['ALL_HTTP']), 'OperaMini') > 0) {
+                $is_mobile = 1;
+            }
+        }
+
+        if (strpos(strtolower($_SERVER['HTTP_USER_AGENT']), 'windows') > 0) {
+            $is_mobile = 0;
+        }
+
+        return $is_mobile;
+    }
+
+    public static function metaData($options, $print = false)
+    {
+        $site = self::aVal($options, "site");
+        $title = self::aVal($options, "title");
+        $image = self::aVal($options, "image");
+        $description = self::aVal($options, "description");
+        $url = self::aVal($options, "url");
+        $fbid = self::aVal($options, "fbid", 0);
+        $fbusername = self::aVal($options, "fbusername", null);
+        $twitter = self::aVal($options, "creator", "rapttors");
+        $creator = self::aVal($options, "creator", "RapTToR");
+
+        $s = '
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="' . $title . '">
+        <meta property="og:description" content="' . $description . '">
+        <meta property="og:image" content="' . $image . '">
+        <meta property="og:url" content="' . $url . '">
+        <meta name="twitter:card" content="' . $image . '">
+        <meta name="twitter:creator" content="@' . $twitter . '">
+
+        <!--  Non-Essential, But Recommended -->
+        <meta property="og:site_name" content="' . $site . '">
+        <meta name="twitter:image:alt" content="' . $title . '">
+        ';
+        if (strlen($fbid) > 0 || $fbid > 0 || strlen($fbusername) > 0) {
+            $s .= '
+        <!--  Non-Essential, But Required for Analytics -->
+        <meta property="fb:app_id" content="your_app_id" />
+        <meta name="twitter:site" content="@website-username">
+        ';
+        }
+        if ($print) echo $s;
+        return $s;
+    }
+
+    public static function shareOnLine($link, $print)
+    {
+        $s = "<script>
+            if (!window.shareControl) { 
+                function shareControl(thisObj, shareType) {
+                    var slide = thisObj.closest('section.slide');
+                    var slideNum = slide.data('slidenum');
+                    var slideName = slide.find('img:first').attr('alt');
+                    var slideId = slide.attr('id');
+                    var currentDomain = window.location.hostname;
+                    if (shareType == 'email') { //email share
+                    window.location = 'mailto:?subject=\"Title - '+ slideName +'\"&body=View Slide at - '+ currentDomain +'/survey.php?id='+ slideId;
+                    } else if (shareType == 'facebook'){ //facebook share
+                        window.open('https://www.facebook.com/sharer/sharer.php?u='+ currentDomain +'/survey.php?title='+ title +'&id='+ slideId, '_blank');
+                    } else if (shareType == 'twitter'){ //twitter share
+                        window.open('https://twitter.com/home?status='+ currentDomain +'/survey.php?title='+ title +'&id='+ slideId, '_blank');
+                    } else { //linkedin share
+                        window.open('https://www.linkedin.com/shareArticle?mini=true&url='+ currentDomain +'/survey.php?title='+ title +'&id='+ slideId, '_blank');
+                    }
+                }
+                //share control links
+                $('.emailShare').on('click', function(){ //on email click
+                    shareControl($(this), 'email');
+                });
+                $('.facebookShare').on('click', function(){ //on facebook click
+                    shareControl($(this), 'facebook');
+                });
+                $('.twitterShare').on('click', function(){ //on twitter click
+                    shareControl( $(this), 'twitter');
+                });
+                $('.linkedinShare').on('click', function(){ //on linkedin click
+                    shareControl($(this), 'linkedin');
+                });
+            }
+            </script>
+            <div class='shareControl'>
+            <span class='emailShare'><i class='fa fa-envelope'></i> Email</span>
+            <span class='facebookShare'><i class='fa fa-facebook'></i> facebook</span>
+            <span class='twitterShare'><i class='fa fa-twitter'></i> twitter</span>
+            <span class='linkedinShare'><i class='fa fa-linkedin'></i> linkedIn</span>
+            </div>
+            ";
+        if ($print) echo $s;
+        return $s;
     }
 }
