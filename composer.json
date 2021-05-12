@@ -33,9 +33,12 @@
           "reference": "master"
         },
         "autoload": {
-          "psr-0": {
-            "RapTToR\\Helper": "src"
-          }
+          "psr-4": {
+            "RapTToR\\Helper\\": "src/"
+          },
+          "files": [
+            "src/Helper.php"
+          ]
         }
       }
     }
