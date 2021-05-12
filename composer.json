@@ -31,14 +31,6 @@
           "url": "https://github.com/rapttor/helper.git",
           "type": "git",
           "reference": "master"
-        },
-        "autoload": {
-          "psr-4": {
-            "RapTToR\\Helper\\": "src/"
-          },
-          "files": [
-            "src/Helper.php"
-          ]
         }
       }
     }
@@ -47,9 +39,12 @@
     "php": ">=4.5.0"
   },
   "autoload": {
-    "psr-0": {
-      "Helper": "RapTToR/"
-    }
+    "psr-4": {
+      "RapTToR\\Helper\\": "src/"
+    },
+    "files": [
+      "src/Helper.php"
+    ]
   },
   "replace": {
     "rapttor/helper": "self.version"
