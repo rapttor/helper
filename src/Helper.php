@@ -8,7 +8,7 @@ namespace RapTToR;
  */
 $RapTToR_HELPER = array();
 
-class Helper extends 
+class Helper  
 {
 
     public static function mime_content_type($filename)
