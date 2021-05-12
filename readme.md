@@ -1,4 +1,4 @@
-Yii Helper class
+PHP Helper class
 =========================
 
 Features
