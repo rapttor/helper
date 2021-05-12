@@ -8,8 +8,494 @@ namespace RapTToR;
  */
 $RapTToR_HELPER = array();
 
-class Helper  
+class Helper
 {
+
+
+    public static function parseEmails($string)
+    {
+        $pattern = '/[a-z0-9_\-\+\.]+@[a-z0-9\-]+\.([a-z]{2,4})(?:\.[a-z]{2})?/i';
+        preg_match_all($pattern, $string, $matches);
+        return $matches[0];
+    }
+
+    public static function cleanup($meta, $bad = array())
+    {
+        foreach ($meta as $k => $v) if (is_string($v)) {
+            $t = $v;
+            $t = trim(str_ireplace("\t", "", $t));
+            $t = \RapTToR\Helper::replaceAll("  ", " ", $t);
+            $t = str_ireplace($bad, "", $t);
+            $t = \RapTToR\Helper::replaceAll("&nbsp;", " ", $t);
+            $t = \RapTToR\Helper::replaceAll("\t", " ", $t);
+            $t = \RapTToR\Helper::replaceAll("\n", " ", $t);
+            $t = \RapTToR\Helper::replaceAll("\r", " ", $t);
+
+            //$clean = preg_replace( "/[^\p{L}|\p{N}]+/u", " ", $clean );
+            //$clean = preg_replace( "/[\p{Z}]{2,}/u", " ", $clean );
+            //$clean = preg_replace( '/[^\p{L}\p{N} ]+/', " ", $clean );
+            //$clean = preg_replace( '/\W+/', " ", $clean );
+            //$clean = preg_replace( "/[^[:alnum:][:space:]]/u", "", $clean );
+
+
+            for ($i = 0; $i < 32; $i++)
+                $t = str_ireplace(chr($i), "", $t);
+            $t = \RapTToR\Helper::replaceAll("  ", " ", $t);
+            $t = preg_replace('/\s+/', " ", $t);
+            $meta[$k] = $t;
+        }
+        return $meta;
+    }
+
+    public static function validUrl($url)
+    {
+        $url = filter_var($url, FILTER_SANITIZE_URL);
+        return filter_var($url, FILTER_VALIDATE_URL);
+    }
+
+    public static function validEmail($email)
+    {
+        return filter_var($email, FILTER_VALIDATE_EMAIL);
+    }
+
+    public static function onlyNumbers($strOrgNumber)
+    {
+        return preg_replace('/[^0-9.]+/', '', $strOrgNumber);
+    }
+
+    public static function fixUrl($url)
+    {
+        $url = str_ireplace("//", "/", $url);
+        $url = str_ireplace("//", "/", $url);
+        $url = str_ireplace("//", "/", $url);
+        $url = str_ireplace(":/", "://", $url);
+        return $url;
+    }
+
+
+    public static function objectToArray($obj, $deep = true)
+    {
+        $reflectionClass = new \ReflectionClass(get_class($obj));
+        $array = array();
+        foreach ($reflectionClass->getProperties() as $property) {
+            $property->setAccessible(true);
+            $val = $property->getValue($obj);
+            if (true === $deep && is_object($val)) {
+                $val = self::objectToArray($val);
+            }
+            $array[$property->getName()] = $val;
+            $property->setAccessible(false);
+        }
+        return $array;
+    }
+
+
+    public static function again($print = false)
+    {
+        $result = "<script>
+            document.location.reload();
+        </script>";
+        if ($print) echo $result;
+        return $result;
+    }
+
+
+    public static function parseUrls($string)
+    {
+        preg_match_all('#\bhttps?://[^,\s()<>]+(?:\([\w\d]+\)|([^,[:punct:]\s]|/))#', $string, $match);
+        return (is_array($match[0])) ? $match[0] : null;
+    }
+
+    public static function toEnglishDate($date, $glue = " ", $lang = "sv_SE")
+    {
+        $w = explode($glue, $date);
+        $n = array();
+        foreach ($w as $k => $m) {
+            if (!is_numeric($m)) $m = self::getEnglishMonthName($m, $lang);
+            $n[$k] = $m;
+        }
+        return implode($glue, $n);
+    }
+
+    public static function getEnglishMonthName($foreignMonthName, $setlocale = 'sv_SE')
+    {
+
+        setlocale(LC_ALL, 'en_US');
+
+        $month_numbers = range(1, 12);
+        $english_months = array();
+        $foreign_months = array();
+        foreach ($month_numbers as $month)
+            $english_months[] = strftime('%B', mktime(0, 0, 0, $month, 1, 2011));
+
+        setlocale(LC_ALL, $setlocale);
+
+        foreach ($month_numbers as $month)
+            $foreign_months[] = strftime('%B', mktime(0, 0, 0, $month, 1, 2011));
+
+        return str_replace($foreign_months, $english_months, $foreignMonthName);
+    }
+
+    public static function to_utf8($in)
+    {
+        $out = array();
+        if (is_array($in)) {
+            foreach ($in as $key => $value) {
+                $out[self::to_utf8($key)] = self::to_utf8($value);
+            }
+        } elseif (is_string($in)) {
+            if (mb_detect_encoding($in) != "UTF-8")
+                return utf8_encode($in);
+            else
+                return $in;
+        } else {
+            return $in;
+        }
+        return $out;
+    }
+
+    public static function flat_array($a)
+    {
+        $n = array();
+        if (is_array($a)) {
+            foreach ($a as $k => $v) {
+                if (is_array($v)) $n[] = self::flat_array($v);
+                if (is_string($v)) $n[] = $v;
+            }
+        }
+        if (is_string($a)) $n[] = $a;
+        return $n;
+    }
+
+
+
+    public static function curl_get_yql($URL)
+    {
+        $yql_base_url = "http://query.yahooapis.com/v1/public/yql";
+        $yql_query = "select * from html where url='$URL'";
+        $yql_query_url = $yql_base_url . "?q=" . urlencode($yql_query);
+        $yql_query_url .= "&format=json";
+        return self::get($yql_query_url);
+    }
+
+    public static function post($URL, $data, $proxy = null, $agent = null, $debug = false)
+    {
+        return self::get($URL, $proxy = null, $agent = null, $debug = false, $data);
+    }
+
+    public static function get($URL, $proxy = null, $agent = null, $debug = false, $data = null)
+    {
+        $c = curl_init();
+        $p = "";
+
+        /* if (!is_null($proxy)) {
+            $p = Proxy::one($proxy);
+            curl_setopt($c, CURLOPT_HTTPPROXYTUNNEL, 0);
+            curl_setopt($c, CURLOPT_PROXY, $p[0]);
+            curl_setopt($c, CURLOPT_PROXYPORT, $p[1]);
+        } */
+        $a = "";
+        if (!is_null($agent)) {
+            $a = self::agent($agent, self::agentsBot());
+            curl_setopt($c, CURLOPT_USERAGENT, $a);
+        }
+        curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($c, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($c, CURLOPT_CONNECTTIMEOUT, 30);
+        curl_setopt($c, CURLOPT_TIMEOUT, 40);
+        curl_setopt($c, CURLOPT_URL, $URL);
+        if (!is_null($data)) {
+            if (is_array($data)) {
+                $postvars = '';
+                foreach ($data as $key => $value) {
+                    $postvars .= $key . "=" . $value . "&";
+                }
+            } else $postvars = $data;
+            curl_setopt($c, CURLOPT_POSTFIELDS, $postvars);
+        }
+        $contents = curl_exec($c);
+        if ($debug) {
+            $info = "";
+            if ($c) $info = curl_getinfo($c);
+            if (!$contents) $contents = null;
+            return array(
+                "url" => $URL,
+                "agent" => $a,
+                "proxy" => $p,
+                "info" => $info,
+                "size" => strlen($contents),
+                "data" => $contents,
+            );
+        }
+        curl_close($c);
+        if ($contents) {
+            return $contents;
+        } else return FALSE;
+    }
+
+    public static function slug($s)
+    {
+        $o = $s;
+        if (is_array($s)) $s = serialize($s);
+        if (is_object($s)) $s = json_encode($s);
+        $s = self::cleanString($s);
+        $s = str_replace(' ', '-', $s); // Replaces all spaces with hyphens.
+        $s = preg_replace('/[^A-Za-z0-9\-]/', '', $s); // Removes special chars.
+        return $s;
+    }
+
+
+    public static function cleanString($text)
+    {
+        // 1) convert á ô => a o
+        $text = preg_replace("/[áàâãªä]/u", "a", $text);
+        $text = preg_replace("/[ÁÀÂÃÄ]/u", "A", $text);
+        $text = preg_replace("/[ÍÌÎÏ]/u", "I", $text);
+        $text = preg_replace("/[íìîï]/u", "i", $text);
+        $text = preg_replace("/[éèêë]/u", "e", $text);
+        $text = preg_replace("/[ÉÈÊË]/u", "E", $text);
+        $text = preg_replace("/[óòôõºö]/u", "o", $text);
+        $text = preg_replace("/[ÓÒÔÕÖ]/u", "O", $text);
+        $text = preg_replace("/[úùûü]/u", "u", $text);
+        $text = preg_replace("/[ÚÙÛÜ]/u", "U", $text);
+        $text = preg_replace("/[’‘‹›‚]/u", "'", $text);
+        $text = preg_replace("/[“”«»„]/u", '"', $text);
+        $text = str_replace("–", "-", $text);
+        $text = str_replace(" ", " ", $text);
+        $text = str_replace("ç", "c", $text);
+        $text = str_replace("Ç", "C", $text);
+        $text = str_replace("ñ", "n", $text);
+        $text = str_replace("Ñ", "N", $text);
+
+        //2) Translation CP1252. &ndash; => -
+        $trans = get_html_translation_table(HTML_ENTITIES);
+        $trans[chr(130)] = '&sbquo;';    // Single Low-9 Quotation Mark
+        $trans[chr(131)] = '&fnof;';    // Latin Small Letter F With Hook
+        $trans[chr(132)] = '&bdquo;';    // Double Low-9 Quotation Mark
+        $trans[chr(133)] = '&hellip;';    // Horizontal Ellipsis
+        $trans[chr(134)] = '&dagger;';    // Dagger
+        $trans[chr(135)] = '&Dagger;';    // Double Dagger
+        $trans[chr(136)] = '&circ;';    // Modifier Letter Circumflex Accent
+        $trans[chr(137)] = '&permil;';    // Per Mille Sign
+        $trans[chr(138)] = '&Scaron;';    // Latin Capital Letter S With Caron
+        $trans[chr(139)] = '&lsaquo;';    // Single Left-Pointing Angle Quotation Mark
+        $trans[chr(140)] = '&OElig;';    // Latin Capital Ligature OE
+        $trans[chr(145)] = '&lsquo;';    // Left Single Quotation Mark
+        $trans[chr(146)] = '&rsquo;';    // Right Single Quotation Mark
+        $trans[chr(147)] = '&ldquo;';    // Left Double Quotation Mark
+        $trans[chr(148)] = '&rdquo;';    // Right Double Quotation Mark
+        $trans[chr(149)] = '&bull;';    // Bullet
+        $trans[chr(150)] = '&ndash;';    // En Dash
+        $trans[chr(151)] = '&mdash;';    // Em Dash
+        $trans[chr(152)] = '&tilde;';    // Small Tilde
+        $trans[chr(153)] = '&trade;';    // Trade Mark Sign
+        $trans[chr(154)] = '&scaron;';    // Latin Small Letter S With Caron
+        $trans[chr(155)] = '&rsaquo;';    // Single Right-Pointing Angle Quotation Mark
+        $trans[chr(156)] = '&oelig;';    // Latin Small Ligature OE
+        $trans[chr(159)] = '&Yuml;';    // Latin Capital Letter Y With Diaeresis
+        $trans['euro'] = '&euro;';    // euro currency symbol
+        ksort($trans);
+
+        foreach ($trans as $k => $v) {
+            $text = str_replace($v, $k, $text);
+        }
+
+        // 3) remove <p>, <br/> ...
+        $text = strip_tags($text);
+
+        // 4) &amp; => & &quot; => '
+        $text = html_entity_decode($text);
+
+        // 5) remove Windows-1252 symbols like "TradeMark", "Euro"...
+        $text = preg_replace('/[^(\x20-\x7F)]*/', '', $text);
+
+        $targets = array('\r\n', '\n', '\r', '\t');
+        $results = array(" ", " ", " ", "");
+        $text = str_replace($targets, $results, $text);
+
+        //XML compatible
+        /*
+        $text = str_replace("&", "and", $text);
+        $text = str_replace("<", ".", $text);
+        $text = str_replace(">", ".", $text);
+        $text = str_replace("\\", "-", $text);
+        $text = str_replace("/", "-", $text);
+        */
+
+        return ($text);
+    }
+
+    public static function serverIP($ip, $allow_private = false, $proxy_ip = [])
+    {
+        if (!is_string($ip) || is_array($proxy_ip) && in_array($ip, $proxy_ip)) return false;
+        $filter_flag = FILTER_FLAG_NO_RES_RANGE;
+
+        if (!$allow_private) {
+            //Disallow loopback IP range which doesn't get filtered via 'FILTER_FLAG_NO_PRIV_RANGE' [1]
+            //[1] https://www.php.net/manual/en/filter.filters.validate.php
+            if (preg_match('/^127\.$/', $ip)) return false;
+            $filter_flag |= FILTER_FLAG_NO_PRIV_RANGE;
+        }
+
+        return filter_var($ip, FILTER_VALIDATE_IP, $filter_flag) !== false;
+    }
+    public static function clientIP($allow_private = false)
+    {
+        //Place your trusted proxy server IPs here.
+        $proxy_ip = array('127.0.0.1');
+
+        //The header to look for (Make sure to pick the one that your trusted reverse proxy is sending or else you can get spoofed)
+        $header = 'HTTP_X_FORWARDED_FOR'; //HTTP_CLIENT_IP, HTTP_X_FORWARDED, HTTP_FORWARDED_FOR, HTTP_FORWARDED
+
+        //If 'REMOTE_ADDR' seems to be a valid client IP, use it.
+        if (self::serverIP($_SERVER['REMOTE_ADDR'], $allow_private, $proxy_ip)) return $_SERVER['REMOTE_ADDR'];
+
+        if (isset($_SERVER[$header])) {
+            //Split comma separated values [1] in the header and traverse the proxy chain backwards.
+            //[1] https://en.wikipedia.org/wiki/X-Forwarded-For#Format
+            $chain = array_reverse(preg_split('/\s*,\s*/', $_SERVER[$header]));
+            foreach ($chain as $ip) if (self::serverIP($ip, $allow_private, $proxy_ip)) return $ip;
+        }
+
+        return null;
+    }
+
+
+    public static function agentsBot()
+    {
+        return array(
+            "Google bot" =>
+            "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+            "Bing bot" =>
+            "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
+            "Yahoo! bot" =>
+            "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)",
+        );
+    }
+
+    public static function agentsDesktop()
+    {
+        return array(
+            "Windows 10-based PC using Edge browser" =>
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246",
+            "Chrome OS-based laptop using Chrome browser (Chromebook)" =>
+            "Mozilla/5.0 (X11; CrOS x86_64 8172.45.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.64 Safari/537.36",
+            "Mac OS X-based computer using a Safari browser" =>
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",
+            "Windows 7-based PC using a Chrome browser" =>
+            "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36",
+            "Linux-based PC using a Firefox browser" =>
+            "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1",
+        );
+    }
+
+    public static function agentsTablet()
+    {
+        return array(
+            "Google Pixel C" =>
+            "Mozilla/5.0 (Linux; Android 7.0; Pixel C Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/52.0.2743.98 Safari/537.36",
+            "Sony Xperia Z4 Tablet" =>
+            "Mozilla/5.0 (Linux; Android 6.0.1; SGP771 Build/32.2.A.0.253; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/52.0.2743.98 Safari/537.36",
+            "Nvidia Shield Tablet K1" =>
+            "Mozilla/5.0 (Linux; Android 6.0.1; SHIELD Tablet K1 Build/MRA58K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/55.0.2883.91 Safari/537.36",
+            "Samsung Galaxy Tab S3" =>
+            "Mozilla/5.0 (Linux; Android 7.0; SM-T827R4 Build/NRD90M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.116 Safari/537.36",
+            "Samsung Galaxy Tab A" =>
+            "Mozilla/5.0 (Linux; Android 5.0.2; SAMSUNG SM-T550 Build/LRX22G) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/3.3 Chrome/38.0.2125.102 Safari/537.36",
+            "Amazon Kindle Fire HDX 7" =>
+            "Mozilla/5.0 (Linux; Android 4.4.3; KFTHWI Build/KTU84M) AppleWebKit/537.36 (KHTML, like Gecko) Silk/47.1.79 like Chrome/47.0.2526.80 Safari/537.36",
+            "LG G Pad 7.0" =>
+            "Mozilla/5.0 (Linux; Android 5.0.2; LG-V410/V41020c Build/LRX22G) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/34.0.1847.118 Safari/537.36",
+        );
+    }
+
+    public static function agentsWindowsMobile()
+    {
+        return array(
+            "Microsoft Lumia 650" =>
+            "Mozilla/5.0 (Windows Phone 10.0; Android 6.0.1; Microsoft; RM-1152) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Mobile Safari/537.36 Edge/15.15254",
+            "Microsoft Lumia 550" =>
+            "Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; RM-1127_16056) AppleWebKit/537.36(KHTML, like Gecko) Chrome/42.0.2311.135 Mobile Safari/537.36 Edge/12.10536",
+            "Microsoft Lumia 950" =>
+            "Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; Lumia 950) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Mobile Safari/537.36 Edge/13.1058",
+        );
+    }
+
+    public static function agentsIOS()
+    {
+        return array(
+            "Apple iPhone XR (Safari)" =>
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1",
+            "Apple iPhone XS (Chrome)" =>
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/69.0.3497.105 Mobile/15E148 Safari/605.1",
+            "Apple iPhone XS Max (Firefox)" =>
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/13.2b11866 Mobile/16A366 Safari/605.1.15",
+            "Apple iPhone X" =>
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1",
+            "Apple iPhone 8" =>
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.34 (KHTML, like Gecko) Version/11.0 Mobile/15A5341f Safari/604.1",
+            "Apple iPhone 8 Plus" =>
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A5370a Safari/604.1",
+            "Apple iPhone 7" =>
+            "Mozilla/5.0 (iPhone9,3; U; CPU iPhone OS 10_0_1 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14A403 Safari/602.1",
+            "Apple iPhone 7 Plus" =>
+            "Mozilla/5.0 (iPhone9,4; U; CPU iPhone OS 10_0_1 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14A403 Safari/602.1",
+            "Apple iPhone 6" =>
+            "Mozilla/5.0 (Apple-iPhone7C2/1202.466; U; CPU like Mac OS X; en) AppleWebKit/420+ (KHTML, like Gecko) Version/3.0 Mobile/1A543 Safari/419.3",
+        );
+    }
+
+    public static function agentsAndroid()
+    {
+        return array(
+            "Samsung Galaxy S9" =>
+            "Mozilla/5.0 (Linux; Android 8.0.0; SM-G960F Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.84 Mobile Safari/537.36",
+            "Samsung Galaxy S8" =>
+            "Mozilla/5.0 (Linux; Android 7.0; SM-G892A Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/60.0.3112.107 Mobile Safari/537.36",
+            "Samsung Galaxy S7" =>
+            "Mozilla/5.0 (Linux; Android 7.0; SM-G930VC Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/58.0.3029.83 Mobile Safari/537.36",
+            "Samsung Galaxy S7 Edge" =>
+            "Mozilla/5.0 (Linux; Android 6.0.1; SM-G935S Build/MMB29K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/55.0.2883.91 Mobile Safari/537.36",
+            "Samsung Galaxy S6" =>
+            "Mozilla/5.0 (Linux; Android 6.0.1; SM-G920V Build/MMB29K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.36",
+            "Samsung Galaxy S6 Edge Plus" =>
+            "Mozilla/5.0 (Linux; Android 5.1.1; SM-G928X Build/LMY47X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.83 Mobile Safari/537.36",
+            "Nexus 6P" =>
+            "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 6P Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.83 Mobile Safari/537.36",
+            "Sony Xperia XZ" =>
+            "Mozilla/5.0 (Linux; Android 7.1.1; G8231 Build/41.2.A.0.219; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/59.0.3071.125 Mobile Safari/537.36",
+            "Sony Xperia Z5" =>
+            "Mozilla/5.0 (Linux; Android 6.0.1; E6653 Build/32.2.A.0.253) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.36",
+            "HTC One X10" =>
+            "Mozilla/5.0 (Linux; Android 6.0; HTC One X10 Build/MRA58K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.98 Mobile Safari/537.36",
+            "HTC One M9" =>
+            "Mozilla/5.0 (Linux; Android 6.0; HTC One M9 Build/MRA58K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.3",
+        );
+    }
+
+    public static function agents()
+    {
+        return
+            self::agentsAndroid() +
+            self::agentsDesktop() +
+            self::agentsIOS() +
+            self::agentsTablet() +
+            self::agentsWindowsMobile();
+    }
+
+    /**
+     * @param null $id (<1 for random)
+     * @param null $agents
+     * @return mixed
+     */
+    public static function agent($id = null, $agents = null)
+    {
+        if (is_null($agents)) $agents = self::agents();
+        $agents = array_values($agents);
+        if (is_null($id) || $id < 1) $id = rand(0, count($agents) - 1);
+        return $agents[$id];
+    }
+
 
     public static function mime_content_type($filename)
     {
