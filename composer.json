@@ -26,7 +26,7 @@
       "type": "package",
       "package": {
         "name": "rapttor/helper",
-        "version": "dev-master",
+        "version": "master",
         "source": {
           "url": "https://github.com/rapttor/helper.git",
           "type": "git",
