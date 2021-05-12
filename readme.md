@@ -4,7 +4,7 @@ Yii Helper class
 Features
 --------
 
-* Simplify your life working with Yii1.x rest apps
+* Simplify your life working with php rest apps
 * PSR-4 autoloading compliant structure
 * Unit-Testing with PHPUnit [in progress]
     
@@ -24,5 +24,3 @@ or
           "url": "https://github.com/rapttor/helper.git"
         }
       ]
-      
- define class Controller() when not using Yii framework
