@@ -44,9 +44,9 @@
     "php": ">=4.5.0"
   },
   "autoload": {
-    "classmap": [
-      "src/Helper.php"
-    ]
+    "psr-0": {
+      "Helper": "RapTToR/"
+    },
   },
   "replace": {
     "rapttor/helper": "self.version"
