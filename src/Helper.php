@@ -7,6 +7,7 @@ namespace RapTToR;
  * require __DIR__ . '/protected/vendor/autoload.php';
  */
 $RapTToR_HELPER = array();
+$RapTToR_LANGUAGES = array();
 
 class Helper
 {
@@ -36,7 +37,6 @@ class Helper
             //$clean = preg_replace( '/[^\p{L}\p{N} ]+/', " ", $clean );
             //$clean = preg_replace( '/\W+/', " ", $clean );
             //$clean = preg_replace( "/[^[:alnum:][:space:]]/u", "", $clean );
-
 
             for ($i = 0; $i < 32; $i++)
                 $t = str_ireplace(chr($i), "", $t);
@@ -1271,15 +1271,24 @@ class Helper
     }
 
     // translate service
-    public static function t($section, $text, $language = "en")
+    public static function t($section, $text, $language = "en", $force = false)
     {
+        global $RapTToR_LANGUAGES;
         $base = self::base();
         $filename = $base . '/languages/' . $language . '/' . $section . '.json';
-        if (is_file($filename)) {
+        $lang = null;
+        if (isset($RapTToR_LANGUAGES[$language]))
+            $lang = $RapTToR_LANGUAGES[$language];
+
+        if ((is_null($lang) || $force) && is_file($filename)) {
             $lang = json_decode($filename, true);
-            if (isset($lang[$text]))
-                $text = $lang[$text];
+            if (is_array($lang)) {
+                $RapTToR_LANGUAGES[$language] = $lang;
+            }
         }
+        if (isset($lang[$text]))
+            $text = $lang[$text];
+
         return $text;
     }
 
@@ -1329,17 +1338,32 @@ class Helper
 
 
 
-    public static function cdnImage($image, $replace = array())
+    /**
+     * create statically.io CDN from image
+     * $host defaults to ngrok, HTTP_HOST
+     */
+    public static function cdnImage($imageurl, $replace = array(), $host = null)
     {
-        // https://cdn.statically.io/img/cdn.rapttor.com/f=auto/influencer/dashboard/uploads/companymedia/1/31.jpg
-        $with = '';
-        $img = str_ireplace($replace, $with, $image);
+        if (is_null($host)) {
+            $host = self::ngrok();
+            if (is_null($host) && isset($_SERVER["HTTP_HOST"]))
+                $host = $_SERVER["HTTP_HOST"];
+        }
+
+        // https://cdn.statically.io/img/cdn.rapttor.com/f=auto/[imageloaclurl:/uploads/companymedia/1/31.jpg]
+        $with = array_values($replace);
+        $replace = array_keys($replace);
+
+        $img = str_ireplace($replace, $with, $imageurl);
         if (substr($img, 0, 4) != 'http' && substr($img, 0, 1) == '/')
-            $img = 'https://cdn.statically.io/img/cdn.rapttor.com/f=auto' . $image;
+            $img = 'https://cdn.statically.io/img/' . $host . '/f=auto' . $imageurl;
         return $img;
     }
 
 
+    /**
+     * Save json to file + gzipped file.
+     */
     public static function saveData($file, $json, $delete = false)
     {
         $cmp = gzcompress($json);
@@ -1352,6 +1376,9 @@ class Helper
         return $okc && $ok;
     }
 
+    /**
+     * Generate remote user UID
+     */
     public static function remoteUserId($nick = null)
     {
         $remoteport = self::aVal($_SERVER, "REMOTE_PORT");
@@ -1363,6 +1390,9 @@ class Helper
         return $uid;
     }
 
+    /**
+     * Get php://input as array, and merge $_REQUEST if mapping on.
+     */
     public static function retrieveJsonPostData($map = false)
     {
         $rawData = file_get_contents("php://input");
@@ -1384,6 +1414,9 @@ class Helper
         error_reporting(E_ALL);
     }
 
+    /**
+     * Social networks data
+     */
     public static function SocialNetworks()
     {
 
@@ -1427,6 +1460,9 @@ class Helper
         return $networks;
     }
 
+    /**
+     * Check if request call is from mobile phone
+     */
     public static function is_mobile()
     {
         $is_mobile = '0';
@@ -1459,6 +1495,10 @@ class Helper
         return $is_mobile;
     }
 
+    /**
+     * Generate metatags
+     * @param options [site,title,image,description,url,fbif,fbusername, creator]
+     */
     public static function metaData($options, $print = false)
     {
         $site = self::aVal($options, "site");
@@ -1539,5 +1579,23 @@ class Helper
             ";
         if ($print) echo $s;
         return $s;
+    }
+
+
+    /**
+     * @param $param (null for all)
+     * @param $port (4040)
+     * @param $tunnel (0)
+     */
+    public static function ngrok($param = "public_html", $port = 4040, $tunnel = 0)
+    {
+        $n = file_get_contents("http://127.0.0.1:$port/api/tunnels");
+        $j = json_decode($n, true);
+        if (is_null($param)) return $j;
+        return (isset($j) && $j && is_array($j)
+            && isset($j["tunnels"]) && is_array($j["tunnels"])
+            && isset($j["tunnels"][$tunnel]) && is_array($j["tunnels"][0])
+            && isset($j["tunnels"][$tunnel][$param]))
+            ? $j["tunnels"][$tunnel][$param] : null;
     }
 }
