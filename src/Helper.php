@@ -9,16 +9,51 @@ namespace RapTToR;
 $RapTToR_HELPER = array();
 $RapTToR_LANGUAGES = array();
 
+
+
 class Helper
 {
 
-
-    public static function parseEmails($string)
+    public static function dump($v)
     {
-        $pattern = '/[a-z0-9_\-\+\.]+@[a-z0-9\-]+\.([a-z]{2,4})(?:\.[a-z]{2})?/i';
-        preg_match_all($pattern, $string, $matches);
-        return $matches[0];
+        if (is_string($v)) $v = htmlspecialchars($v, ENT_QUOTES);
+        echo '<textarea style="margin-left:10%;width:88%;height:49vh;">';
+        var_dump($v);
+        echo '</textarea>';
     }
+
+    
+
+
+    
+
+    public static function to_utf8_2($html)
+    {
+        $html = html_entity_decode(htmlentities($html, ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'ISO-8859-1');
+        return $html;
+    }
+
+    public
+    static function meta2csv($a, $prefix = "")
+    {
+        $r = "";
+        if (is_array($a)) {
+            foreach ($a as $k => $d) {
+                if (is_array($d)) {
+                    $r .= self::meta2csv($d, $k);
+                } elseif (is_string($d)) {
+                    $r .= $d;
+                }
+            }
+        } else
+                if (is_string($a)) {
+            $r .= $a;
+        }
+        return $r;
+    }
+
+
+
 
     public static function cleanup($meta, $bad = array())
     {
@@ -168,15 +203,6 @@ class Helper
     }
 
 
-
-    public static function curl_get_yql($URL)
-    {
-        $yql_base_url = "http://query.yahooapis.com/v1/public/yql";
-        $yql_query = "select * from html where url='$URL'";
-        $yql_query_url = $yql_base_url . "?q=" . urlencode($yql_query);
-        $yql_query_url .= "&format=json";
-        return self::get($yql_query_url);
-    }
 
     public static function post($URL, $data, $proxy = null, $agent = null, $debug = false)
     {
@@ -717,8 +743,8 @@ class Helper
 
     public static function time_elapsed_string($datetime, $full = false)
     {
-        $now = new DateTime;
-        $ago = new DateTime($datetime, new DateTimeZone(date_default_timezone_get()));
+        $now = new \DateTime;
+        $ago = new \DateTime($datetime, new \DateTimeZone(date_default_timezone_get()));
         $diff = $now->diff($ago);
 
         $diff->w = floor($diff->d / 7);
@@ -1075,21 +1101,23 @@ class Helper
 
     public static function validateDate($date, $format = 'Y-m-d')
     {
-        $d = DateTime::createFromFormat($format, $date);
+        $d = \DateTime::createFromFormat($format, $date);
         // The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
         return $d && $d->format($format) === $date;
     }
 
     public static function validateTime($date, $format = 'Y-m-d H:i:s')
     {
-        $d = DateTime::createFromFormat($format, $date);
+        $d = \DateTime::createFromFormat($format, $date);
         // The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
         return $d && $d->format($format) === $date;
     }
 
 
-    public static function debug($message, $type = "info", $value = null)
+    public static function debug($message = null, $type = "info", $value = null)
     {
+        if (is_null($message))
+            return self::is_debug();
         global $RapTToR_HELPER;
         $debug = array("message" => $message, "type" => $type, "value" => $value);
         $RapTToR_HELPER["debug"][] = $debug;
@@ -1160,14 +1188,14 @@ class Helper
                 break;
 
             default:
-                throw new Exception('File "' . $filename . '" is not valid jpg, png or gif image.');
+                throw new \Exception('File "' . $filename . '" is not valid jpg, png or gif image.');
                 break;
         }
     }
 
     public static function exceptions_error_handler($severity, $message, $filename, $lineno)
     {
-        throw new ErrorException($message, 0, $severity, $filename, $lineno);
+        throw new \ErrorException($message, 0, $severity, $filename, $lineno);
     }
 
     // set_error_handler('exceptions_error_handler');
@@ -1221,14 +1249,6 @@ class Helper
     }
 
 
-    /**
-     * @param $pass
-     * @return string
-     */
-    public static function encryptPassword($pass)
-    {
-        return sha1($pass);
-    }
 
 
     /**
@@ -1325,16 +1345,6 @@ class Helper
         return $units;
     }
 
-    public static function exec($cmd)
-    {
-        $result = array();
-        $cmd = escapeshellcmd($cmd);
-        ob_start();
-        $result["output"] = shell_exec($cmd);
-        $result["content"] = ob_get_contents();
-        ob_end_clean(); //Use this instead of ob_flush()
-        return $result;
-    }
 
 
 
@@ -1407,12 +1417,14 @@ class Helper
         }
     }
 
-    public static function showErrors()
+    static public function showErrors($notimelimit = true)
     {
         ini_set('display_errors', 1);
         ini_set('display_startup_errors', 1);
         error_reporting(E_ALL);
+        if ($notimelimit) set_time_limit(-1);
     }
+
 
     /**
      * Social networks data
@@ -1597,5 +1609,797 @@ class Helper
             && isset($j["tunnels"][$tunnel]) && is_array($j["tunnels"][0])
             && isset($j["tunnels"][$tunnel][$param]))
             ? $j["tunnels"][$tunnel][$param] : null;
+    }
+
+
+
+
+    static public function repeat()
+    {
+    ?>
+        window.location.reload();
+<?php
+    }
+
+
+    static public function is_debug()
+    {
+        return isset($_REQUEST["debug"]) ? (int)$_REQUEST["debug"] : false;
+    }
+
+    static public function force()
+    {
+        return isset($_REQUEST["force"]) ? (int)$_REQUEST["force"] : false;
+    }
+
+
+    static public function uncompress($str)
+    {
+        $temp = @gzuncompress($str);
+        return $temp;
+    }
+
+    static public function uncmp($str)
+    {
+        return self::uncompress(utf8_decode($str));
+    }
+
+    static public function cmp($str)
+    {
+        return utf8_encode(self::compress($str));
+    }
+
+    static public function compress($str)
+    {
+        $cmp = gzcompress($str, 9);
+        return $cmp;
+    }
+
+    static public function isCompressed($str)
+    {
+        $ok = false;
+        $str1 = utf8_decode($str);
+        if (@gzuncompress($str) !== false) $ok = true;
+        if (@gzuncompress($str1) !== false) $ok = true;
+        return $ok;
+    }
+
+    public static function s3download($bucketid, $where)
+    {
+        $cmd = "aws s3 sync s3://$bucketid $where";
+        return array("cmd" => $cmd, "result" => self::exec($cmd));
+    }
+
+    /**
+     * @param $pass
+     * @return string
+     */
+    public static function encryptPassword($pass)
+    {
+        return sha1($pass);
+    }
+
+    /**
+     * @return string|null
+     */
+    public static function bearerCreate()
+    {
+        return sha1(microtime(true)) . md5(rand(1, 10000)) . sha1(json_encode($_SERVER));
+        return null;
+    }
+
+
+    /**
+     * Get data from table by kv array criteria and set new one with kv+attributes if not exists;
+     * @param $table
+     * @param $kv
+     * @param null $attributes
+     * @return array|CActiveRecord|mixed|null
+     */
+    public static function getset($table, $kv, $attributes = null)
+    {
+        /** @var CActiveRecord $class */
+        $class = ucfirst($table);
+        $d = $class::model()->findByAttributes($kv);
+        if (!$d && !is_null($attributes)) {
+            $d = new $class();
+
+            foreach ($kv as $k => $v)
+                $d->$k = $v;
+            foreach ($attributes as $k => $v)
+                $d->$k = $v;
+            try {
+                $d->save();
+            } catch (\Exception $e) {
+                echo 'Caught exception: ', $e->getMessage(), "\n";
+            }
+        }
+        return $d;
+    }
+
+    /**
+     * Acceptable formats
+     * @return array
+     */
+    public static function formats()
+    {
+        return array(
+            0 => "Html",
+            1 => "JSON",
+            2 => "Xml",
+        );
+    }
+
+
+
+    public static function backgrounds()
+    {
+        $dir = dirname(__FILE__) . '/../../images/videos/';
+        $videos = scandir($dir);
+        if (is_array($videos)) foreach ($videos as $video) if (stripos($video, ".mp4")) {
+            $name = trim(str_ireplace(".mp4", "", $video));
+            $backgrounds[$name] = $video;
+        }
+        return $backgrounds;
+    }
+
+    public static function languages()
+    {
+        return array(
+            "ba" => "Bosanski",
+            "bg" => "Български",
+            "me" => "Crnogorski",
+            "de" => "Deutsch",
+            "en" => "English",
+            "fr" => "Française",
+            "hr" => "Hrvatski",
+            "it" => "Italiano",
+            "mk" => "Македонски",
+            "du" => "Nederlandse",
+            "ru" => "Română",
+            "ru" => "Русский",
+            "rs" => "Srpski",
+            "sl" => "Slovenščina",
+            "sv" => "Swenska",
+            "tr" => "Türk",
+            "ch" => "中文",
+            //"yu" => "ExYu",
+            "ko" => "한국어",
+        );
+    }
+
+
+
+
+
+    public function YesNo()
+    {
+        return array(
+            -1 => Helper::t('front', "No"),
+            0 => Helper::t('front', "Not set"),
+            1 => Helper::t('front', "Yes"),
+        );
+    }
+
+
+
+    public static function exec($cmd)
+    {
+        $result = array();
+        $cmd = escapeshellcmd($cmd);
+        ob_start();
+        $result["output"] = shell_exec($cmd);
+        $result["content"] = ob_get_contents();
+        ob_end_clean(); //Use this instead of ob_flush()
+        return $result;
+    }
+
+
+
+
+
+
+    public static function enumerate($modelarr, $id = "id")
+    {
+        $result = array();
+        if (is_array($modelarr))
+            foreach ($modelarr as $m)
+                if (isset($m->$id))
+                    $result[$m->$id] = $m;
+        return $result;
+    }
+
+    public static function mailText($text)
+    {
+        $text = self::br2nl($text);
+        $text = self::htmlChars($text);
+        $text = self::nbsp($text);
+        return $text;
+    }
+
+    public static function htmlChars($text)
+    {
+        return htmlspecialchars($text, ENT_QUOTES);
+    }
+
+    public static function br2nl($text)
+    {
+        return str_ireplace(
+            array('<br />', '<br>', '<br/>'),
+            chr(13) . chr(10) . "\r\n" . '%0D%0A',
+            $text
+        );
+    }
+
+    public static function nbsp($text)
+    {
+        return str_ireplace(' ', '&nbsp;', $text);
+    }
+
+
+    /**
+     * @param $t Tagging
+     */
+    static public function isTestSet($t)
+    {
+        return (
+            (
+                (date("Y-m-d", strtotime($t->validatedat)) >= "2020-09-18" &&
+                    date("Y-m-d", strtotime($t->validatedat)) <= "2020-10-01")
+                or (date("Y-m-d", strtotime($t->validatedat)) >= "2020-11-7" &&
+                    date("Y-m-d", strtotime($t->validatedat)) <= "2020-11-13"))
+            &&
+            $t->validatedby == 15);
+    }
+
+    static public function criteriaTestset($criteria)
+    {
+        $testsetfrom = "2020-09-18";
+        $testsetto = "2020-10-01";
+        $testsetfrom2 = "2020-11-7";
+        $testsetto2 = "2020-11-13";
+        $criteria->addCondition("(validatedat>=:testsetfrom and validatedat<=:testsetto) or (validatedat>=:testsetfrom2 and validatedat<=:testsetto2)");
+        $criteria->addCondition("validatedby=15");
+        $criteria->params["testsetfrom"] = $testsetfrom;
+        $criteria->params["testsetto"] = $testsetto;
+        $criteria->params["testsetfrom2"] = $testsetfrom2;
+        $criteria->params["testsetto2"] = $testsetto2;
+        return $criteria;
+    }
+
+    public static function status()
+    {
+        return array(
+            -2 => self::t("front", "deleted"),
+            -1 => self::t("front", "inactive"),
+            0 => self::t("front", "default"),
+            1 => self::t("front", "active"),
+            2 => self::t("front", "featured"),
+        );
+    }
+
+    public static function unserialize($c, $onlynew = false)
+    {
+        $a = array();
+        if (is_array($c)) {
+            $a = $c;
+        } else if (is_string($c)) {
+            $a = json_decode($c, true);
+        }
+        $new = array();
+        if (isset($a) && is_array($a)) foreach ($a as $v) {
+            $a[Helper::aVal($v, "name")] = Helper::aVal($v, "value");
+            $new[Helper::aVal($v, "name")] = Helper::aVal($v, "value");
+        }
+        return ($onlynew) ? $new : $a;
+    }
+
+
+    public static function storeDir()
+    {
+        return "../../front/data/";
+    }
+
+    public static function htmlNoCache()
+    {
+        return '
+        <meta http-equiv="cache-control" content="max-age=0" />
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="expires" content="0" />
+<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+<meta http-equiv="pragma" content="no-cache" />';
+    }
+
+    public static function mb_ucfirst($str, $encoding = "UTF-8", $lower_str_end = false)
+    {
+        $first_letter = mb_strtoupper(mb_substr($str, 0, 1, $encoding), $encoding);
+        $str_end = "";
+        if ($lower_str_end) {
+            $str_end = mb_strtolower(mb_substr($str, 1, mb_strlen($str, $encoding), $encoding), $encoding);
+        } else {
+            $str_end = mb_substr($str, 1, mb_strlen($str, $encoding), $encoding);
+        }
+        $str = $first_letter . $str_end;
+        return $str;
+    }
+
+    public static function decontaminate_text(
+        $text,
+        $remove_tags = true,
+        $remove_line_breaks = true,
+        $remove_BOM = true,
+        $ensure_utf8_encoding = true,
+        $ensure_quotes_are_properly_displayed = true,
+        $decode_html_entities = true
+    ) {
+
+        if ('' != $text && is_string($text)) {
+            $text = preg_replace('@<(script|style)[^>]*?>.*?</\\1>@si', '', $text);
+            $text = str_replace(']]>', ']]&gt;', $text);
+
+            if ($remove_tags) {
+                // Which tags to allow (none!)
+                // $text = strip_tags($text, '<p>,<strong>,<span>,<a>');
+                $text = strip_tags($text, '');
+            }
+
+            if ($remove_line_breaks) {
+                $text = preg_replace('/[\r\n\t ]+/', ' ', $text);
+                $text = trim($text);
+            }
+
+            if ($remove_BOM) {
+                // Source: https://stackoverflow.com/a/31594983/1766219
+                if (0 === strpos(bin2hex($text), 'efbbbf')) {
+                    $text = substr($text, 3);
+                }
+            }
+
+            if ($ensure_utf8_encoding) {
+
+                // Check if UTF8-encoding
+                if (utf8_encode(utf8_decode($text)) != $text) {
+                    $text = mb_convert_encoding($text, 'utf-8', 'auto');
+                }
+            }
+
+            if ($ensure_quotes_are_properly_displayed) {
+                $text = str_replace('&quot;', '"', $text);
+            }
+
+            if ($decode_html_entities) {
+                $text = html_entity_decode($text);
+            }
+
+            /**
+             * Other things to try
+             * - the chr-function: https://stackoverflow.com/a/20845642/1766219
+             * - stripslashes (THIS ONE BROKE MY JSON DECODING, AFTER IT STARTED WORKING, THOUGH): https://stackoverflow.com/a/28540745/1766219
+             * - This (improved?) JSON-decoder didn't help me, but it sure looks fancy: https://stackoverflow.com/a/43694325/1766219
+             */
+        }
+        return $text;
+    }
+
+    public static function all2Lat($string)
+    {
+        $rus = array('š', 'Š', 'Đ', 'đ', 'Č', 'č', 'Ć', 'ć', 'Ž', 'ž');
+        $lat = array('s', 'S', 'Dj', 'dj', 'C', 'c', 'C', 'c', 'Z', 'z');
+        $string = str_replace($rus, $lat, $string);
+        return ($string);
+    }
+
+    public static function cp1250_to_utf2($text)
+    {
+        $dict  = array(
+            chr(225) => 'á', chr(228) =>  'ä', chr(232) => 'č', chr(239) => 'ď',
+            chr(233) => 'é', chr(236) => 'ě', chr(237) => 'í', chr(229) => 'ĺ', chr(229) => 'ľ',
+            chr(242) => 'ň', chr(244) => 'ô', chr(243) => 'ó', chr(154) => 'š', chr(248) => 'ř',
+            chr(250) => 'ú', chr(249) => 'ů', chr(157) => 'ť', chr(253) => 'ý', chr(158) => 'ž',
+            chr(193) => 'Á', chr(196) => 'Ä', chr(200) => 'Č', chr(207) => 'Ď', chr(201) => 'É',
+            chr(204) => 'Ě', chr(205) => 'Í', chr(197) => 'Ĺ',    chr(188) => 'Ľ', chr(210) => 'Ň',
+            chr(212) => 'Ô', chr(211) => 'Ó', chr(138) => 'Š', chr(216) => 'Ř', chr(218) => 'Ú',
+            chr(217) => 'Ů', chr(141) => 'Ť', chr(221) => 'Ý', chr(142) => 'Ž',
+            chr(150) => '-'
+        );
+        return strtr($text, $dict);
+    }
+
+
+    public static function win2ascii($str)
+    {
+
+        $old = $str;
+
+        if (false) $str = strtr(
+            $str,
+            "\xE1\xE8\xEF\xEC\xE9\xED\xF2",
+            "\x61\x63\x64\x65\x65\x69\x6E"
+        );
+
+        if (false) $str = strtr(
+            $str,
+            "\xF3\xF8\x9A\x9D\xF9\xFA\xFD\x9E\xF4\xBC\xBE",
+            "\x6F\x72\x73\x74\x75\x75\x79\x7A\x6F\x4C\x6C"
+        );
+
+        if (false) $str = strtr(
+            $str,
+            "\xC1\xC8\xCF\xCC\xC9\xCD\xC2\xD3\xD8",
+            "\x41\x43\x44\x45\x45\x49\x4E\x4F\x52"
+        );
+
+        if (false) $str = strtr(
+            $str,
+            "\x8A\x8D\xDA\xDD\x8E\xD2\xD9\xEF\xCF",
+            "\x53\x54\x55\x59\x5A\x4E\x55\x64\x44"
+        );
+
+        $str = strtr(
+            $str,
+            "\xE1\xE8\xEF\xEC\xE9\xED\xF2\xF3\xF8\x9A\x9D\xF9\xFA\xFD\x9E\xF4\xBC" .
+                "\xBE\xC1\xC8\xCF\xCC\xC9\xCD\xC2\xD3\xD8\x8A\x8D\xDA\xDD\x8E\xD2\xD9\xEF\xCF",
+
+            "\x61\x63\x64\x65\x65\x69\x6E\x6F\x72\x73\x74\x75\x75\x79\x7A\x6F\x4C" .
+                "\x6C\x41\x43\x44\x45\x45\x49\x4E\x4F\x52\x53\x54\x55\x59\x5A\x4E\x55\x64\x44"
+        );
+
+        $str = strtr(
+            $str,
+            "\xA1\xAA\xBA\xBF\xC0\xC1\xC2\xC3\xC5\xC7
+         \xC8\xC9\xCA\xCB\xCC\xCD\xCE\xCF\xD0\xD1
+         \xD2\xD3\xD4\xD5\xD8\xD9\xDA\xDB\xDD\xE0
+         \xE1\xE2\xE3\xE5\xE7\xE8\xE9\xEA\xEB\xEC
+         \xED\xEE\xEF\xF0\xF1\xF2\xF3\xF4\xF5\xF8
+         \xF9\xFA\xFB\xFD\xFF",
+            "!ao?AAAAAC
+         EEEEIIIIDN
+         OOOOOUUUYa
+         aaaaceeeei
+         iiidnooooo
+         uuuyy"
+        );
+
+        $str = strtr($str, array("\xC4" => "Ae", "\xC6" => "AE", "\xD6" => "Oe", "\xDC" => "Ue", "\xDE" => "TH", "\xDF" => "ss", "\xE4" => "ae", "\xE6" => "ae", "\xF6" => "oe", "\xFC" => "ue", "\xFE" => "th"));
+
+        /* if (stripos($old, 'dij') == false && stripos($str, 'dij') != false)
+            $str = str_ireplace('dij', 'dj', $str); */
+
+        return $str;
+    }
+
+    public static function remove_accents($string, $german = false)
+    {
+        // Single letters
+        $single_fr = explode(" ", "À Á Â Ã Ä Å &#260; &#258; Ç &#262; &#268; &#270; &#272; Ð È É Ê Ë &#280; &#282; &#286; Ì Í Î Ï &#304; &#321; &#317; &#313; Ñ &#323; &#327; Ò Ó Ô Õ Ö Ø &#336; &#340; &#344; Š &#346; &#350; &#356; &#354; Ù Ú Û Ü &#366; &#368; Ý Ž &#377; &#379; à á â ã ä å &#261; &#259; ç &#263; &#269; &#271; &#273; è é ê ë &#281; &#283; &#287; ì í î ï &#305; &#322; &#318; &#314; ñ &#324; &#328; ð ò ó ô õ ö ø &#337; &#341; &#345; &#347; š &#351; &#357; &#355; ù ú û ü &#367; &#369; ý ÿ ž &#378; &#380;");
+        $single_to = explode(" ", "A A A A A A A A C C C D D D E E E E E E G I I I I I L L L N N N O O O O O O O R R S S S T T U U U U U U Y Z Z Z a a a a a a a a c c c d d e e e e e e g i i i i i l l l n n n o o o o o o o o r r s s s t t u u u u u u y y z z z");
+        $single = array();
+        for ($i = 0; $i < count($single_fr); $i++) {
+            $single[$single_fr[$i]] = $single_to[$i];
+        }
+        // Ligatures
+        $ligatures = array("Æ" => "Ae", "æ" => "ae", "Œ" => "Oe", "œ" => "oe", "ß" => "ss");
+        // German umlauts
+        $umlauts = array("Ä" => "Ae", "ä" => "ae", "Ö" => "Oe", "ö" => "oe", "Ü" => "Ue", "ü" => "ue");
+        // Replace
+        $replacements = array_merge($single, $ligatures);
+        if ($german) $replacements = array_merge($replacements, $umlauts);
+        $string = strtr($string, $replacements);
+        return $string;
+    }
+
+    public static function mb_strtr($str, $from, $to = null)
+    {
+        if (is_array($from)) {
+            $from = array_map('utf8_decode', $from);
+            $from = array_map('utf8_decode', array_flip($from));
+            return utf8_encode(strtr(utf8_decode($str), array_flip($from)));
+        }
+        return utf8_encode(strtr(utf8_decode($str), utf8_decode($from), utf8_decode($to)));
+    }
+
+    public static function transcribe_cp1252_to_latin1($cp1252)
+    {
+        return strtr(
+            $cp1252,
+            array(
+                "\x80" => "e",  "\x81" => " ",    "\x82" => "'", "\x83" => 'f',
+                "\x84" => '"',  "\x85" => "...",  "\x86" => "+", "\x87" => "#",
+                "\x88" => "^",  "\x89" => "0/00", "\x8A" => "S", "\x8B" => "<",
+                "\x8C" => "OE", "\x8D" => " ",    "\x8E" => "Z", "\x8F" => " ",
+                "\x90" => " ",  "\x91" => "`",    "\x92" => "'", "\x93" => '"',
+                "\x94" => '"',  "\x95" => "*",    "\x96" => "-", "\x97" => "--",
+                "\x98" => "~",  "\x99" => "(TM)", "\x9A" => "s", "\x9B" => ">",
+                "\x9C" => "oe", "\x9D" => " ",    "\x9E" => "z", "\x9F" => "Y"
+            )
+        );
+    }
+
+    public static function remove_accent($str)
+    {
+        $a = array('À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ð', 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'ß', 'à', 'á', 'â', 'ã', 'ä', 'å', 'æ', 'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', 'ø', 'ù', 'ú', 'û', 'ü', 'ý', 'ÿ', 'Ā', 'ā', 'Ă', 'ă', 'Ą', 'ą', 'Ć', 'ć', 'Ĉ', 'ĉ', 'Ċ', 'ċ', 'Č', 'č', 'Ď', 'ď', 'Đ', 'đ', 'Ē', 'ē', 'Ĕ', 'ĕ', 'Ė', 'ė', 'Ę', 'ę', 'Ě', 'ě', 'Ĝ', 'ĝ', 'Ğ', 'ğ', 'Ġ', 'ġ', 'Ģ', 'ģ', 'Ĥ', 'ĥ', 'Ħ', 'ħ', 'Ĩ', 'ĩ', 'Ī', 'ī', 'Ĭ', 'ĭ', 'Į', 'į', 'İ', 'ı', 'Ĳ', 'ĳ', 'Ĵ', 'ĵ', 'Ķ', 'ķ', 'Ĺ', 'ĺ', 'Ļ', 'ļ', 'Ľ', 'ľ', 'Ŀ', 'ŀ', 'Ł', 'ł', 'Ń', 'ń', 'Ņ', 'ņ', 'Ň', 'ň', 'ŉ', 'Ō', 'ō', 'Ŏ', 'ŏ', 'Ő', 'ő', 'Œ', 'œ', 'Ŕ', 'ŕ', 'Ŗ', 'ŗ', 'Ř', 'ř', 'Ś', 'ś', 'Ŝ', 'ŝ', 'Ş', 'ş', 'Š', 'š', 'Ţ', 'ţ', 'Ť', 'ť', 'Ŧ', 'ŧ', 'Ũ', 'ũ', 'Ū', 'ū', 'Ŭ', 'ŭ', 'Ů', 'ů', 'Ű', 'ű', 'Ų', 'ų', 'Ŵ', 'ŵ', 'Ŷ', 'ŷ', 'Ÿ', 'Ź', 'ź', 'Ż', 'ż', 'Ž', 'ž', 'ſ', 'ƒ', 'Ơ', 'ơ', 'Ư', 'ư', 'Ǎ', 'ǎ', 'Ǐ', 'ǐ', 'Ǒ', 'ǒ', 'Ǔ', 'ǔ', 'Ǖ', 'ǖ', 'Ǘ', 'ǘ', 'Ǚ', 'ǚ', 'Ǜ', 'ǜ', 'Ǻ', 'ǻ', 'Ǽ', 'ǽ', 'Ǿ', 'ǿ');
+        $b = array('A', 'A', 'A', 'A', 'A', 'A', 'AE', 'C', 'E', 'E', 'E', 'E', 'I', 'I', 'I', 'I', 'D', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'U', 'U', 'U', 'U', 'Y', 's', 'a', 'a', 'a', 'a', 'a', 'a', 'ae', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'n', 'o', 'o', 'o', 'o', 'o', 'o', 'u', 'u', 'u', 'u', 'y', 'y', 'A', 'a', 'A', 'a', 'A', 'a', 'C', 'c', 'C', 'c', 'C', 'c', 'C', 'c', 'D', 'd', 'D', 'd', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'G', 'g', 'G', 'g', 'G', 'g', 'G', 'g', 'H', 'h', 'H', 'h', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i', 'IJ', 'ij', 'J', 'j', 'K', 'k', 'L', 'l', 'L', 'l', 'L', 'l', 'L', 'l', 'l', 'l', 'N', 'n', 'N', 'n', 'N', 'n', 'n', 'O', 'o', 'O', 'o', 'O', 'o', 'OE', 'oe', 'R', 'r', 'R', 'r', 'R', 'r', 'S', 's', 'S', 's', 'S', 's', 'S', 's', 'T', 't', 'T', 't', 'T', 't', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'W', 'w', 'Y', 'y', 'Y', 'Z', 'z', 'Z', 'z', 'Z', 'z', 's', 'f', 'O', 'o', 'U', 'u', 'A', 'a', 'I', 'i', 'O', 'o', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'A', 'a', 'AE', 'ae', 'O', 'o');
+        return str_replace($a, $b, $str);
+    }
+
+    public static function normalizeText($string)
+    {
+        $table = array(
+            'Š' => 'S', 'š' => 's', 'Đ' => 'Dj', 'đ' => 'dj', 'Ž' => 'Z', 'ž' => 'z', 'Č' => 'C', 'č' => 'c', 'Ć' => 'C', 'ć' => 'c',
+            'À' => 'A', 'Á' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 'Å' => 'A', 'Æ' => 'A', 'Ç' => 'C', 'È' => 'E', 'É' => 'E',
+            'Ê' => 'E', 'Ë' => 'E', 'Ì' => 'I', 'Í' => 'I', 'Î' => 'I', 'Ï' => 'I', 'Ñ' => 'N', 'Ò' => 'O', 'Ó' => 'O', 'Ô' => 'O',
+            'Õ' => 'O', 'Ö' => 'O', 'Ø' => 'O', 'Ù' => 'U', 'Ú' => 'U', 'Û' => 'U', 'Ü' => 'U', 'Ý' => 'Y', 'Þ' => 'B', 'ß' => 'Ss',
+            'à' => 'a', 'á' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a', 'å' => 'a', 'æ' => 'a', 'ç' => 'c', 'è' => 'e', 'é' => 'e',
+            'ê' => 'e', 'ë' => 'e', 'ì' => 'i', 'í' => 'i', 'î' => 'i', 'ï' => 'i', 'ð' => 'o', 'ñ' => 'n', 'ò' => 'o', 'ó' => 'o',
+            'ô' => 'o', 'õ' => 'o', 'ö' => 'o', 'ø' => 'o', 'ù' => 'u', 'ú' => 'u', 'û' => 'u', 'ý' => 'y', 'ý' => 'y', 'þ' => 'b',
+            'ÿ' => 'y', 'Ŕ' => 'R', 'ŕ' => 'r',
+            chr(0x8A) => chr(0xA9),
+            chr(0x8C) => chr(0xA6),
+            chr(0x8D) => chr(0xAB),
+            chr(0x8E) => chr(0xAE),
+            chr(0x8F) => chr(0xAC),
+            chr(0x9C) => chr(0xB6),
+            chr(0x9D) => chr(0xBB),
+            chr(0xA1) => chr(0xB7),
+            chr(0xA5) => chr(0xA1),
+            chr(0xBC) => chr(0xA5),
+            chr(0x9F) => chr(0xBC),
+            chr(0xB9) => chr(0xB1),
+            chr(0x9A) => chr(0xB9),
+            chr(0xBE) => chr(0xB5),
+            chr(0x9E) => chr(0xBE),
+            chr(0x80) => '&euro;',
+            chr(0x82) => '&sbquo;',
+            chr(0x84) => '&bdquo;',
+            chr(0x85) => '&hellip;',
+            chr(0x86) => '&dagger;',
+            chr(0x87) => '&Dagger;',
+            chr(0x89) => '&permil;',
+            chr(0x8B) => '&lsaquo;',
+            chr(0x91) => '&lsquo;',
+            chr(0x92) => '&rsquo;',
+            chr(0x93) => '&ldquo;',
+            chr(0x94) => '&rdquo;',
+            chr(0x95) => '&bull;',
+            chr(0x96) => '&ndash;',
+            chr(0x97) => '&mdash;',
+            chr(0x99) => '&trade;',
+            chr(0x9B) => '&rsquo;',
+            chr(0xA6) => '&brvbar;',
+            chr(0xA9) => '&copy;',
+            chr(0xAB) => '&laquo;',
+            chr(0xAE) => '&reg;',
+            chr(0xB1) => '&plusmn;',
+            chr(0xB5) => '&micro;',
+            chr(0xB6) => '&para;',
+            chr(0xB7) => '&middot;',
+            chr(0xBB) => '&raquo;',
+            "\x80" => "e",  "\x81" => " ",    "\x82" => "'", "\x83" => 'f',
+            "\x84" => '"',  "\x85" => "...",  "\x86" => "+", "\x87" => "#",
+            "\x88" => "^",  "\x89" => "0/00", "\x8A" => "S", "\x8B" => "<",
+            "\x8C" => "OE", "\x8D" => " ",    "\x8E" => "Z", "\x8F" => " ",
+            "\x90" => " ",  "\x91" => "`",    "\x92" => "'", "\x93" => '"',
+            "\x94" => '"',  "\x95" => "*",    "\x96" => "-", "\x97" => "--",
+            "\x98" => "~",  "\x99" => "(TM)", "\x9A" => "s", "\x9B" => ">",
+            "\x9C" => "oe", "\x9D" => " ",    "\x9E" => "z", "\x9F" => "Y",
+            // ---
+            chr(225) => 'á', chr(228) =>  'ä', chr(232) => 'č', chr(239) => 'ď',
+            chr(233) => 'é', chr(236) => 'ě', chr(237) => 'í', chr(229) => 'ĺ', chr(229) => 'ľ',
+            chr(242) => 'ň', chr(244) => 'ô', chr(243) => 'ó', chr(154) => 'š', chr(248) => 'ř',
+            chr(250) => 'ú', chr(249) => 'ů', chr(157) => 'ť', chr(253) => 'ý', chr(158) => 'ž',
+            chr(193) => 'Á', chr(196) => 'Ä', chr(200) => 'Č', chr(207) => 'Ď', chr(201) => 'É',
+            chr(204) => 'Ě', chr(205) => 'Í', chr(197) => 'Ĺ',    chr(188) => 'Ľ', chr(210) => 'Ň',
+            chr(212) => 'Ô', chr(211) => 'Ó', chr(138) => 'Š', chr(216) => 'Ř', chr(218) => 'Ú',
+            chr(217) => 'Ů', chr(141) => 'Ť', chr(221) => 'Ý', chr(142) => 'Ž',
+            chr(150) => '-',
+        );
+        return strtr($string, $table);
+    }
+
+    public static function w1250_to_utf8($text, $encoding = 'ISO-8859-2')
+    {
+        // map based on:
+        // http://konfiguracja.c0.pl/iso02vscp1250en.html
+        // http://konfiguracja.c0.pl/webpl/index_en.html#examp
+        // http://www.htmlentities.com/html/entities/
+        $map = array(
+            chr(0x8A) => chr(0xA9),
+            chr(0x8C) => chr(0xA6),
+            chr(0x8D) => chr(0xAB),
+            chr(0x8E) => chr(0xAE),
+            chr(0x8F) => chr(0xAC),
+            chr(0x9C) => chr(0xB6),
+            chr(0x9D) => chr(0xBB),
+            chr(0xA1) => chr(0xB7),
+            chr(0xA5) => chr(0xA1),
+            chr(0xBC) => chr(0xA5),
+            chr(0x9F) => chr(0xBC),
+            chr(0xB9) => chr(0xB1),
+            chr(0x9A) => chr(0xB9),
+            chr(0xBE) => chr(0xB5),
+            chr(0x9E) => chr(0xBE),
+            chr(0x80) => '&euro;',
+            chr(0x82) => '&sbquo;',
+            chr(0x84) => '&bdquo;',
+            chr(0x85) => '&hellip;',
+            chr(0x86) => '&dagger;',
+            chr(0x87) => '&Dagger;',
+            chr(0x89) => '&permil;',
+            chr(0x8B) => '&lsaquo;',
+            chr(0x91) => '&lsquo;',
+            chr(0x92) => '&rsquo;',
+            chr(0x93) => '&ldquo;',
+            chr(0x94) => '&rdquo;',
+            chr(0x95) => '&bull;',
+            chr(0x96) => '&ndash;',
+            chr(0x97) => '&mdash;',
+            chr(0x99) => '&trade;',
+            chr(0x9B) => '&rsquo;',
+            chr(0xA6) => '&brvbar;',
+            chr(0xA9) => '&copy;',
+            chr(0xAB) => '&laquo;',
+            chr(0xAE) => '&reg;',
+            chr(0xB1) => '&plusmn;',
+            chr(0xB5) => '&micro;',
+            chr(0xB6) => '&para;',
+            chr(0xB7) => '&middot;',
+            chr(0xBB) => '&raquo;',
+        );
+        $text = html_entity_decode(mb_convert_encoding(strtr($text, $map), 'UTF-8', $encoding), ENT_QUOTES, 'UTF-8');
+        $text = strtr($text, $map);
+        return $text;
+    }
+
+    /**
+     * $s original text
+     * $a array(replace, with)
+     */
+    public static function replaceText($s, $a)
+    {
+        if (is_string($a)) $a = array(0 => array($a), 1 => array(""));
+        $s = str_ireplace($a[0], $a[1], $s);
+        return $s;
+    }
+
+
+    public static function normalizeString($ws)
+    {
+        $ws = str_ireplace(
+            array("-", " .", " ,", " ?", " !", " :", "  "),
+            array(" - ", ".", ",", "?", "!", ": ", " "),
+            $ws
+        );
+        return $ws;
+    }
+
+    /**
+     * $title string
+     * $words array
+     * @return array
+     */
+    public static function w2a($title, $words)
+    {
+        //$ws = preg_split("/u(?<=\w)\b\s*/", $title);
+        $ws = $title;
+        $ws = str_ireplace(
+            array("-", ".", ",", "?", "!"),
+            array(" - ", " .", " ,", " ?", " !"),
+            $ws
+        );
+        $ws = explode(" ", $ws);
+        $wa = array();
+        foreach ($ws as $w) {
+            if (isset($words[$w])) {
+                $wa[] = $words[$w];
+            } else {
+                $wa[] = $w;
+            }
+        }
+        return $wa;
+    }
+
+    /**
+     * $a array
+     * $words array 
+     * @return string
+     */
+    public static function a2w($a, $words)
+    {
+        $t = array_flip($words);
+        foreach ($a as $k => $i) if (is_numeric($i)) {
+            if (isset($t[$i])) {
+                $a[$k] = $t[$i];
+            }
+        }
+        $s = implode(' ', $a);
+        $s = self::normalizeString($s);
+        return $s;
+    }
+
+    public static function removeAll($w, $mn, $replace = "")
+    {
+        while (stripos($w, $mn) > -1) {
+            $o = $w;
+            $w = str_ireplace($mn, $replace, $w);
+            if (Helper::debug())
+                echo "$o -> - $mn = $w <br/>";
+        }
+        return $w;
+    }
+
+
+
+    /** LZW compression
+     * @param string data to compress
+     * @return string binary data
+     */
+    public static  function lzw_compress($string)
+    {
+        // compression
+        $dictionary = array_flip(range("\0", "\xFF"));
+        $word = "";
+        $codes = array();
+        for ($i = 0; $i <= strlen($string); $i++) {
+            $x = substr($string, $i, 1);
+            if (strlen($x) && isset($dictionary[$word . $x])) {
+                $word .= $x;
+            } elseif ($i) {
+                $codes[] = $dictionary[$word];
+                $dictionary[$word . $x] = count($dictionary);
+                $word = $x;
+            }
+        }
+
+        // convert codes to binary string
+        $dictionary_count = 256;
+        $bits = 8; // ceil(log($dictionary_count, 2))
+        $return = "";
+        $rest = 0;
+        $rest_length = 0;
+        foreach ($codes as $code) {
+            $rest = ($rest << $bits) + $code;
+            $rest_length += $bits;
+            $dictionary_count++;
+            if ($dictionary_count >> $bits) {
+                $bits++;
+            }
+            while ($rest_length > 7) {
+                $rest_length -= 8;
+                $return .= chr($rest >> $rest_length);
+                $rest &= (1 << $rest_length) - 1;
+            }
+        }
+        return $return . ($rest_length ? chr($rest << (8 - $rest_length)) : "");
+    }
+
+
+
+    public static function toutf8($text)
+    {
+        return iconv(mb_detect_encoding($text, mb_detect_order(), true), "UTF-8", $text);
+    }
+    public static function any2utf8($var, $deep = TRUE)
+    {
+        if (is_array($var)) {
+            foreach ($var as $key => $value) {
+                if ($deep) {
+                    $var[$key] = self::any2utf8($value, $deep);
+                } elseif (!is_array($value) && !is_object($value) && !mb_detect_encoding($value, 'utf-8', true)) {
+                    $var[$key] = utf8_encode($value);
+                }
+            }
+            return $var;
+        } elseif (is_object($var)) {
+            foreach ($var as $key => $value) {
+                if ($deep) {
+                    $var->$key = self::any2utf8($value, $deep);
+                } elseif (!is_array($value) && !is_object($value) && !mb_detect_encoding($value, 'utf-8', true)) {
+                    $var->$key = utf8_encode($value);
+                }
+            }
+            return $var;
+        } else {
+            return (!mb_detect_encoding($var, 'utf-8', true)) ? utf8_encode($var) : $var;
+        }
     }
 }
