@@ -50,7 +50,7 @@
     ]
   },
   "replace": {
-    "rapttor/helper": "self.version",
+    "rapttor/helper": "self.version"
     
   }
 }
