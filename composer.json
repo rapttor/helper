@@ -36,17 +36,21 @@
     }
   ],
   "require": {
-    "php": ">=4.5.0"
+    "php": ">=4.5.0",
+    "ressio/pharse": "^0.2.0"
   },
   "autoload": {
     "psr-4": {
       "RapTToR\\Helper\\": "src/"
+      
     },
     "files": [
       "src/Helper.php"
+      
     ]
   },
   "replace": {
-    "rapttor/helper": "self.version"
+    "rapttor/helper": "self.version",
+    
   }
 }
