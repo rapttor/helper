@@ -11,9 +11,17 @@ $RapTToR_LANGUAGES = array();
 
 
 
+/**
+ * [Description Helper]
+ */
 class Helper
 {
 
+    /**
+     * @param mixed $v
+     * 
+     * @return [type]
+     */
     public static function dump($v)
     {
         if (is_string($v)) $v = htmlspecialchars($v, ENT_QUOTES);
@@ -22,19 +30,29 @@ class Helper
         echo '</textarea>';
     }
 
-    
 
 
-    
 
+
+
+    /**
+     * @param mixed $html
+     * 
+     * @return [type]
+     */
     public static function to_utf8_2($html)
     {
         $html = html_entity_decode(htmlentities($html, ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'ISO-8859-1');
         return $html;
     }
 
-    public
-    static function meta2csv($a, $prefix = "")
+    /**
+     * @param mixed $a
+     * @param string $prefix
+     * 
+     * @return [type]
+     */
+    public static function meta2csv($a, $prefix = "")
     {
         $r = "";
         if (is_array($a)) {
@@ -55,6 +73,12 @@ class Helper
 
 
 
+    /**
+     * @param mixed $meta
+     * @param array $bad
+     * 
+     * @return [type]
+     */
     public static function cleanup($meta, $bad = array())
     {
         foreach ($meta as $k => $v) if (is_string($v)) {
@@ -82,22 +106,42 @@ class Helper
         return $meta;
     }
 
+    /**
+     * @param mixed $url
+     * 
+     * @return [type]
+     */
     public static function validUrl($url)
     {
         $url = filter_var($url, FILTER_SANITIZE_URL);
         return filter_var($url, FILTER_VALIDATE_URL);
     }
 
+    /**
+     * @param mixed $email
+     * 
+     * @return [type]
+     */
     public static function validEmail($email)
     {
         return filter_var($email, FILTER_VALIDATE_EMAIL);
     }
 
+    /**
+     * @param mixed $strOrgNumber
+     * 
+     * @return [type]
+     */
     public static function onlyNumbers($strOrgNumber)
     {
         return preg_replace('/[^0-9.]+/', '', $strOrgNumber);
     }
 
+    /**
+     * @param mixed $url
+     * 
+     * @return [type]
+     */
     public static function fixUrl($url)
     {
         $url = str_ireplace("//", "/", $url);
@@ -108,6 +152,12 @@ class Helper
     }
 
 
+    /**
+     * @param mixed $obj
+     * @param bool $deep
+     * 
+     * @return [type]
+     */
     public static function objectToArray($obj, $deep = true)
     {
         $reflectionClass = new \ReflectionClass(get_class($obj));
@@ -125,6 +175,11 @@ class Helper
     }
 
 
+    /**
+     * @param bool $print
+     * 
+     * @return [type]
+     */
     public static function again($print = false)
     {
         $result = "<script>
@@ -135,12 +190,24 @@ class Helper
     }
 
 
+    /**
+     * @param mixed $string
+     * 
+     * @return [type]
+     */
     public static function parseUrls($string)
     {
         preg_match_all('#\bhttps?://[^,\s()<>]+(?:\([\w\d]+\)|([^,[:punct:]\s]|/))#', $string, $match);
         return (is_array($match[0])) ? $match[0] : null;
     }
 
+    /**
+     * @param mixed $date
+     * @param $glue =
+     * @param string $lang
+     * 
+     * @return [type]
+     */
     public static function toEnglishDate($date, $glue = " ", $lang = "sv_SE")
     {
         $w = explode($glue, $date);
@@ -152,6 +219,12 @@ class Helper
         return implode($glue, $n);
     }
 
+    /**
+     * @param mixed $foreignMonthName
+     * @param string $setlocale
+     * 
+     * @return [type]
+     */
     public static function getEnglishMonthName($foreignMonthName, $setlocale = 'sv_SE')
     {
 
@@ -171,6 +244,11 @@ class Helper
         return str_replace($foreign_months, $english_months, $foreignMonthName);
     }
 
+    /**
+     * @param mixed $in
+     * 
+     * @return [type]
+     */
     public static function to_utf8($in)
     {
         $out = array();
@@ -189,6 +267,11 @@ class Helper
         return $out;
     }
 
+    /**
+     * @param mixed $a
+     * 
+     * @return [type]
+     */
     public static function flat_array($a)
     {
         $n = array();
@@ -204,61 +287,27 @@ class Helper
 
 
 
+    /**
+     * @param mixed $URL
+     * @param mixed $data
+     * @param null $proxy
+     * @param null $agent
+     * @param bool $debug
+     * 
+     * @return [type]
+     */
     public static function post($URL, $data, $proxy = null, $agent = null, $debug = false)
     {
         return self::get($URL, $proxy = null, $agent = null, $debug = false, $data);
     }
 
-    public static function get($URL, $proxy = null, $agent = null, $debug = false, $data = null)
-    {
-        $c = curl_init();
-        $p = "";
+    
 
-        /* if (!is_null($proxy)) {
-            $p = Proxy::one($proxy);
-            curl_setopt($c, CURLOPT_HTTPPROXYTUNNEL, 0);
-            curl_setopt($c, CURLOPT_PROXY, $p[0]);
-            curl_setopt($c, CURLOPT_PROXYPORT, $p[1]);
-        } */
-        $a = "";
-        if (!is_null($agent)) {
-            $a = self::agent($agent, self::agentsBot());
-            curl_setopt($c, CURLOPT_USERAGENT, $a);
-        }
-        curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($c, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($c, CURLOPT_CONNECTTIMEOUT, 30);
-        curl_setopt($c, CURLOPT_TIMEOUT, 40);
-        curl_setopt($c, CURLOPT_URL, $URL);
-        if (!is_null($data)) {
-            if (is_array($data)) {
-                $postvars = '';
-                foreach ($data as $key => $value) {
-                    $postvars .= $key . "=" . $value . "&";
-                }
-            } else $postvars = $data;
-            curl_setopt($c, CURLOPT_POSTFIELDS, $postvars);
-        }
-        $contents = curl_exec($c);
-        if ($debug) {
-            $info = "";
-            if ($c) $info = curl_getinfo($c);
-            if (!$contents) $contents = null;
-            return array(
-                "url" => $URL,
-                "agent" => $a,
-                "proxy" => $p,
-                "info" => $info,
-                "size" => strlen($contents),
-                "data" => $contents,
-            );
-        }
-        curl_close($c);
-        if ($contents) {
-            return $contents;
-        } else return FALSE;
-    }
-
+    /**
+     * @param mixed $s
+     * 
+     * @return [type]
+     */
     public static function slug($s)
     {
         $o = $s;
@@ -271,6 +320,11 @@ class Helper
     }
 
 
+    /**
+     * @param mixed $text
+     * 
+     * @return string
+     */
     public static function cleanString($text)
     {
         // 1) convert á ô => a o
@@ -351,178 +405,13 @@ class Helper
         return ($text);
     }
 
-    public static function serverIP($ip, $allow_private = false, $proxy_ip = [])
-    {
-        if (!is_string($ip) || is_array($proxy_ip) && in_array($ip, $proxy_ip)) return false;
-        $filter_flag = FILTER_FLAG_NO_RES_RANGE;
 
-        if (!$allow_private) {
-            //Disallow loopback IP range which doesn't get filtered via 'FILTER_FLAG_NO_PRIV_RANGE' [1]
-            //[1] https://www.php.net/manual/en/filter.filters.validate.php
-            if (preg_match('/^127\.$/', $ip)) return false;
-            $filter_flag |= FILTER_FLAG_NO_PRIV_RANGE;
-        }
-
-        return filter_var($ip, FILTER_VALIDATE_IP, $filter_flag) !== false;
-    }
-    public static function clientIP($allow_private = false)
-    {
-        //Place your trusted proxy server IPs here.
-        $proxy_ip = array('127.0.0.1');
-
-        //The header to look for (Make sure to pick the one that your trusted reverse proxy is sending or else you can get spoofed)
-        $header = 'HTTP_X_FORWARDED_FOR'; //HTTP_CLIENT_IP, HTTP_X_FORWARDED, HTTP_FORWARDED_FOR, HTTP_FORWARDED
-
-        //If 'REMOTE_ADDR' seems to be a valid client IP, use it.
-        if (self::serverIP($_SERVER['REMOTE_ADDR'], $allow_private, $proxy_ip)) return $_SERVER['REMOTE_ADDR'];
-
-        if (isset($_SERVER[$header])) {
-            //Split comma separated values [1] in the header and traverse the proxy chain backwards.
-            //[1] https://en.wikipedia.org/wiki/X-Forwarded-For#Format
-            $chain = array_reverse(preg_split('/\s*,\s*/', $_SERVER[$header]));
-            foreach ($chain as $ip) if (self::serverIP($ip, $allow_private, $proxy_ip)) return $ip;
-        }
-
-        return null;
-    }
-
-
-    public static function agentsBot()
-    {
-        return array(
-            "Google bot" =>
-            "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
-            "Bing bot" =>
-            "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
-            "Yahoo! bot" =>
-            "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)",
-        );
-    }
-
-    public static function agentsDesktop()
-    {
-        return array(
-            "Windows 10-based PC using Edge browser" =>
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246",
-            "Chrome OS-based laptop using Chrome browser (Chromebook)" =>
-            "Mozilla/5.0 (X11; CrOS x86_64 8172.45.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.64 Safari/537.36",
-            "Mac OS X-based computer using a Safari browser" =>
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",
-            "Windows 7-based PC using a Chrome browser" =>
-            "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36",
-            "Linux-based PC using a Firefox browser" =>
-            "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1",
-        );
-    }
-
-    public static function agentsTablet()
-    {
-        return array(
-            "Google Pixel C" =>
-            "Mozilla/5.0 (Linux; Android 7.0; Pixel C Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/52.0.2743.98 Safari/537.36",
-            "Sony Xperia Z4 Tablet" =>
-            "Mozilla/5.0 (Linux; Android 6.0.1; SGP771 Build/32.2.A.0.253; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/52.0.2743.98 Safari/537.36",
-            "Nvidia Shield Tablet K1" =>
-            "Mozilla/5.0 (Linux; Android 6.0.1; SHIELD Tablet K1 Build/MRA58K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/55.0.2883.91 Safari/537.36",
-            "Samsung Galaxy Tab S3" =>
-            "Mozilla/5.0 (Linux; Android 7.0; SM-T827R4 Build/NRD90M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.116 Safari/537.36",
-            "Samsung Galaxy Tab A" =>
-            "Mozilla/5.0 (Linux; Android 5.0.2; SAMSUNG SM-T550 Build/LRX22G) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/3.3 Chrome/38.0.2125.102 Safari/537.36",
-            "Amazon Kindle Fire HDX 7" =>
-            "Mozilla/5.0 (Linux; Android 4.4.3; KFTHWI Build/KTU84M) AppleWebKit/537.36 (KHTML, like Gecko) Silk/47.1.79 like Chrome/47.0.2526.80 Safari/537.36",
-            "LG G Pad 7.0" =>
-            "Mozilla/5.0 (Linux; Android 5.0.2; LG-V410/V41020c Build/LRX22G) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/34.0.1847.118 Safari/537.36",
-        );
-    }
-
-    public static function agentsWindowsMobile()
-    {
-        return array(
-            "Microsoft Lumia 650" =>
-            "Mozilla/5.0 (Windows Phone 10.0; Android 6.0.1; Microsoft; RM-1152) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Mobile Safari/537.36 Edge/15.15254",
-            "Microsoft Lumia 550" =>
-            "Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; RM-1127_16056) AppleWebKit/537.36(KHTML, like Gecko) Chrome/42.0.2311.135 Mobile Safari/537.36 Edge/12.10536",
-            "Microsoft Lumia 950" =>
-            "Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; Lumia 950) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Mobile Safari/537.36 Edge/13.1058",
-        );
-    }
-
-    public static function agentsIOS()
-    {
-        return array(
-            "Apple iPhone XR (Safari)" =>
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1",
-            "Apple iPhone XS (Chrome)" =>
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/69.0.3497.105 Mobile/15E148 Safari/605.1",
-            "Apple iPhone XS Max (Firefox)" =>
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/13.2b11866 Mobile/16A366 Safari/605.1.15",
-            "Apple iPhone X" =>
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1",
-            "Apple iPhone 8" =>
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.34 (KHTML, like Gecko) Version/11.0 Mobile/15A5341f Safari/604.1",
-            "Apple iPhone 8 Plus" =>
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A5370a Safari/604.1",
-            "Apple iPhone 7" =>
-            "Mozilla/5.0 (iPhone9,3; U; CPU iPhone OS 10_0_1 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14A403 Safari/602.1",
-            "Apple iPhone 7 Plus" =>
-            "Mozilla/5.0 (iPhone9,4; U; CPU iPhone OS 10_0_1 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14A403 Safari/602.1",
-            "Apple iPhone 6" =>
-            "Mozilla/5.0 (Apple-iPhone7C2/1202.466; U; CPU like Mac OS X; en) AppleWebKit/420+ (KHTML, like Gecko) Version/3.0 Mobile/1A543 Safari/419.3",
-        );
-    }
-
-    public static function agentsAndroid()
-    {
-        return array(
-            "Samsung Galaxy S9" =>
-            "Mozilla/5.0 (Linux; Android 8.0.0; SM-G960F Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.84 Mobile Safari/537.36",
-            "Samsung Galaxy S8" =>
-            "Mozilla/5.0 (Linux; Android 7.0; SM-G892A Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/60.0.3112.107 Mobile Safari/537.36",
-            "Samsung Galaxy S7" =>
-            "Mozilla/5.0 (Linux; Android 7.0; SM-G930VC Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/58.0.3029.83 Mobile Safari/537.36",
-            "Samsung Galaxy S7 Edge" =>
-            "Mozilla/5.0 (Linux; Android 6.0.1; SM-G935S Build/MMB29K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/55.0.2883.91 Mobile Safari/537.36",
-            "Samsung Galaxy S6" =>
-            "Mozilla/5.0 (Linux; Android 6.0.1; SM-G920V Build/MMB29K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.36",
-            "Samsung Galaxy S6 Edge Plus" =>
-            "Mozilla/5.0 (Linux; Android 5.1.1; SM-G928X Build/LMY47X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.83 Mobile Safari/537.36",
-            "Nexus 6P" =>
-            "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 6P Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.83 Mobile Safari/537.36",
-            "Sony Xperia XZ" =>
-            "Mozilla/5.0 (Linux; Android 7.1.1; G8231 Build/41.2.A.0.219; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/59.0.3071.125 Mobile Safari/537.36",
-            "Sony Xperia Z5" =>
-            "Mozilla/5.0 (Linux; Android 6.0.1; E6653 Build/32.2.A.0.253) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.36",
-            "HTC One X10" =>
-            "Mozilla/5.0 (Linux; Android 6.0; HTC One X10 Build/MRA58K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.98 Mobile Safari/537.36",
-            "HTC One M9" =>
-            "Mozilla/5.0 (Linux; Android 6.0; HTC One M9 Build/MRA58K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.3",
-        );
-    }
-
-    public static function agents()
-    {
-        return
-            self::agentsAndroid() +
-            self::agentsDesktop() +
-            self::agentsIOS() +
-            self::agentsTablet() +
-            self::agentsWindowsMobile();
-    }
 
     /**
-     * @param null $id (<1 for random)
-     * @param null $agents
-     * @return mixed
+     * @param mixed $filename
+     * 
+     * @return [type]
      */
-    public static function agent($id = null, $agents = null)
-    {
-        if (is_null($agents)) $agents = self::agents();
-        $agents = array_values($agents);
-        if (is_null($id) || $id < 1) $id = rand(0, count($agents) - 1);
-        return $agents[$id];
-    }
-
-
     public static function mime_content_type($filename)
     {
 
@@ -597,6 +486,11 @@ class Helper
         }
     }
 
+    /**
+     * @param mixed $time
+     * 
+     * @return [type]
+     */
     public static function timePassed($time)
     {
         if (is_null($time) || $time == "") return "";
@@ -641,6 +535,12 @@ class Helper
         }
     }
 
+    /**
+     * @param mixed $ar
+     * @param string $key
+     * 
+     * @return [type]
+     */
     public static function mapArray($ar, $key = "id")
     {
         $arNew = array();
@@ -655,6 +555,12 @@ class Helper
         return $arNew;
     }
 
+    /**
+     * @param mixed $str
+     * @param string $delimiter
+     * 
+     * @return [type]
+     */
     public static function urlClean($str, $delimiter = '-')
     {
         $str = trim($str);
@@ -666,12 +572,24 @@ class Helper
         return $clean;
     }
 
+    /**
+     * @param mixed $title
+     * @param null $icon
+     * 
+     * @return [type]
+     */
     public static function header($title, $icon = null)
     {
         return '<h1 class="pull-right"><i class="icons icon-' . $icon . ' pull-right"></i>
             ' . $title . ' &nbsp;</h1>';
     }
 
+    /**
+     * @param mixed $mail
+     * @param null $disposable
+     * 
+     * @return [type]
+     */
     public static function checkEmail($mail, $disposable = null)
     {
         $disposable_mail = array();
@@ -689,17 +607,35 @@ class Helper
         return false;
     }
 
+    /**
+     * @param null $cat
+     * @param null $id
+     * 
+     * @return [type]
+     */
     public static function imgurl($cat = null, $id = null)
     {
         $base = "";
         return $base . "/uploads/" . $cat . "/" . $id . ".jpg";
     }
 
+    /**
+     * @param null $cat
+     * @param null $id
+     * @param string $class
+     * 
+     * @return [type]
+     */
     public static function img($cat = null, $id = null, $class = "img-responsive")
     {
         return "<img src='" . self::imgurl($cat, $id) . "'  class='$class'>";
     }
 
+    /**
+     * @param null $cat
+     * 
+     * @return [type]
+     */
     public static function uploadDir($cat = null)
     {
         $base = "";
@@ -709,12 +645,25 @@ class Helper
         return $base . "/uploads/" . (is_null($cat) ? "" : $cat . '/');
     }
 
+    /**
+     * @param mixed $a
+     * @param mixed $i
+     * @param null $default
+     * 
+     * @return [type]
+     */
     public static function arrayValue($a, $i, $default = null)
     {
         return (is_array($a) && isset($a[$i])) ? $a[$i] : $default;
     }
 
 
+    /**
+     * @param string $min_date
+     * @param string $max_date
+     * 
+     * @return [type]
+     */
     public static function rand_date($min_date = "01-01-2016", $max_date = "31-12-2016")
     {
         /* Gets 2 dates as string, earlier and later date.
@@ -729,11 +678,24 @@ class Helper
         return date('Y-m-d H:i:s', $rand_epoch);
     }
 
+    /**
+     * @param mixed $str
+     * @param string $dom
+     * 
+     * @return [type]
+     */
     public static function domain($str, $dom = "")
     {
         return (strpos($str, "http") === false) ? "http://" . $str : $str;
     }
 
+    /**
+     * @param mixed $url
+     * @param null $text
+     * @param string $options
+     * 
+     * @return [type]
+     */
     public static function link($url, $text = null, $options = 'target="_blank"')
     {
         if (is_null($text)) $text = $url;
@@ -741,6 +703,12 @@ class Helper
         return "<a href='$link' $options>$text</a>";
     }
 
+    /**
+     * @param mixed $datetime
+     * @param bool $full
+     * 
+     * @return [type]
+     */
     public static function time_elapsed_string($datetime, $full = false)
     {
         $now = new \DateTime;
@@ -771,6 +739,12 @@ class Helper
         return $string ? implode(', ', $string) . ' ago' : 'just now';
     }
 
+    /**
+     * @param mixed $tm
+     * @param int $rcs
+     * 
+     * @return [type]
+     */
     public static function ago($tm, $rcs = 0)
     {
         if (is_string($tm)) $tm = strtotime($tm);
@@ -791,6 +765,13 @@ class Helper
         return $x;
     }
 
+    /**
+     * @param mixed $str
+     * @param int $length
+     * @param mixed $more
+     * 
+     * @return [type]
+     */
     public static function more($str, $length = 200, $more = "<!-- more -->")
     {
         if (strlen($str) < $length)
@@ -805,6 +786,11 @@ class Helper
 
 
 
+    /**
+     * @param mixed $menu
+     * 
+     * @return [type]
+     */
     public static function IconMenu($menu)
     {
         $result = "";
@@ -812,6 +798,11 @@ class Helper
         return $result;
     }
 
+    /**
+     * @param mixed $i
+     * 
+     * @return [type]
+     */
     public static function Icon($i)
     {
         $result = "";
@@ -825,12 +816,26 @@ class Helper
         return $result;
     }
 
+    /**
+     * @param mixed $a
+     * @param mixed $k
+     * @param string $d
+     * 
+     * @return [type]
+     */
     public static function aVal($a, $k, $d = "")
     {
         if (is_object($a)) $a = (array)$a;
         return (is_array($a) && isset($a[$k])) ? $a[$k] : $d;
     }
 
+    /**
+     * @param mixed $a
+     * @param mixed $k
+     * @param mixed $v
+     * 
+     * @return [type]
+     */
     public static function aFind($a, $k, $v)
     {
         if (is_array($a)) foreach ($a as $item) {
@@ -841,12 +846,22 @@ class Helper
         return null;
     }
 
+    /**
+     * @param string $title
+     * 
+     * @return [type]
+     */
     public static function back($title = "Back")
     {
         return "<div class='clearfix'></div><a style='clear:both;margin:10px 0;' class='btn btn-primary' onclick='history.go(-1);'><i class='fa fa-caret-left'></i> " .
             $title . "</a><div class='clearfix'></div>";
     }
 
+    /**
+     * @param mixed $string
+     * 
+     * @return [type]
+     */
     public static function is_json($string)
     {
         return ((is_string($string) &&
@@ -854,6 +869,11 @@ class Helper
                 is_array(json_decode($string, true))))) ? true : false;
     }
 
+    /**
+     * @param mixed $string
+     * 
+     * @return [type]
+     */
     public static function json_validate($string)
     {
         // decode the JSON data
@@ -905,6 +925,13 @@ class Helper
         return $result;
     }
 
+    /**
+     * @param mixed $arr
+     * @param mixed $key
+     * @param mixed $def
+     * 
+     * @return [type]
+     */
     public static function jsonValue($arr, $key, $def)
     {
         $value = $def;
@@ -912,6 +939,9 @@ class Helper
         return $value;
     }
 
+    /**
+     * @return [type]
+     */
     public static function jsonError()
     {
         $error = null;
@@ -953,6 +983,14 @@ class Helper
         return $error;
     }
 
+    /**
+     * @param mixed $data
+     * @param bool $cache
+     * @param bool $die
+     * @param bool $convert
+     * 
+     * @return [type]
+     */
     public static function send($data, $cache = false, $die = true, $convert = true)
     {
         if ($convert) {
@@ -972,6 +1010,12 @@ class Helper
     }
 
 
+    /**
+     * @param mixed $str
+     * @param mixed $params
+     * 
+     * @return [type]
+     */
     public static function map($str, $params)
     {
         foreach ($params as $key => $value)
@@ -980,6 +1024,11 @@ class Helper
     }
 
 
+    /**
+     * @param mixed $url
+     * 
+     * @return [type]
+     */
     public static function curl($url)
     {
         if (!function_exists('curl_version')) {
@@ -1005,27 +1054,53 @@ class Helper
         }
     }
 
+    /**
+     * @param mixed $data
+     * 
+     * @return [type]
+     */
     public static function exportModelAsJson($data)
     {
         return $json = (!self::is_json($data)) ? json_encode($data) : $data;
     }
 
+    /**
+     * @param mixed $text
+     * @param mixed $length
+     * 
+     * @return [type]
+     */
     public static function ellipsis($text, $length)
     {
         return (mb_strlen($text) > $length) ? mb_substr($text, 0, $length) . '... ' : $text;
     }
 
+    /**
+     * @param mixed $what
+     * @param mixed $with
+     * @param mixed $str
+     * 
+     * @return [type]
+     */
     public static function replaceAll($what, $with, $str)
     {
         while (stripos($str, $what)) $str = str_ireplace($what, $with, $str);
         return $str;
     }
 
+    /**
+     * @param mixed $str
+     * 
+     * @return [type]
+     */
     public static function urlText($str)
     {
         return self::replaceAll('__', '_', preg_replace('/[^\w]/', '_', $str));
     }
 
+    /**
+     * @return [type]
+     */
     public static function cors()
     {
 
@@ -1091,14 +1166,26 @@ class Helper
         return $arr;
     }
 
+    /**
+     * @param mixed $object
+     * 
+     * @return [type]
+     */
     public static function vardumper($object)
     {
         echo "<pre>";
         var_dump($object);
+        echo "</pre>";
         die;
     }
 
 
+    /**
+     * @param mixed $date
+     * @param string $format
+     * 
+     * @return [type]
+     */
     public static function validateDate($date, $format = 'Y-m-d')
     {
         $d = \DateTime::createFromFormat($format, $date);
@@ -1106,6 +1193,12 @@ class Helper
         return $d && $d->format($format) === $date;
     }
 
+    /**
+     * @param mixed $date
+     * @param $format =
+     * 
+     * @return [type]
+     */
     public static function validateTime($date, $format = 'Y-m-d H:i:s')
     {
         $d = \DateTime::createFromFormat($format, $date);
@@ -1114,6 +1207,13 @@ class Helper
     }
 
 
+    /**
+     * @param null $message
+     * @param string $type
+     * @param null $value
+     * 
+     * @return [type]
+     */
     public static function debug($message = null, $type = "info", $value = null)
     {
         if (is_null($message))
@@ -1167,6 +1267,11 @@ class Helper
     }
 
 
+    /**
+     * @param mixed $filename
+     * 
+     * @return GdImage
+     */
     public static function imageCreateFromAny($filename)
     {
         if (!file_exists($filename)) {
@@ -1193,6 +1298,14 @@ class Helper
         }
     }
 
+    /**
+     * @param mixed $severity
+     * @param mixed $message
+     * @param mixed $filename
+     * @param mixed $lineno
+     * 
+     * @return [type]
+     */
     public static function exceptions_error_handler($severity, $message, $filename, $lineno)
     {
         throw new \ErrorException($message, 0, $severity, $filename, $lineno);
@@ -1200,6 +1313,13 @@ class Helper
 
     // set_error_handler('exceptions_error_handler');
 
+    /**
+     * @param mixed $src
+     * @param mixed $dest
+     * @param mixed $desired_height
+     * 
+     * @return GdImage
+     */
     public static function createThumb($src, $dest, $desired_height)
     {
         /* read the source image */
@@ -1216,14 +1336,28 @@ class Helper
             //    imageantialias($virtual_image, true); //enose PHP ei toeta seda
             /* create the physical thumbnail image to its destination */
             imagejpeg($virtual_image, $dest);
+            return $virtual_image;
         }
+        return false;
     }
 
+    /**
+     * @param $title =
+     * @param int $id
+     * 
+     * @return [type]
+     */
     public static function array0($title = "None selected", $id = 0)
     {
         return array($id => $title);
     }
 
+    /**
+     * @param mixed $value
+     * @param string $table
+     * 
+     * @return [type]
+     */
     public static function metaKey($value, $table = "item")
     {
         return $table . "_" . $value;
@@ -1263,7 +1397,13 @@ class Helper
     }
 
 
-    // for criteria, ids to get for processing.
+    /**
+     * for criteria, ids to get for processing.
+     * 
+     * @param $title =
+     * 
+     * @return [type]
+     */
     public static function None($title = "None selected")
     {
         return array(0 => $title);
@@ -1272,6 +1412,9 @@ class Helper
 
 
 
+    /**
+     * @return [type]
+     */
     public static function unitsList()
     {
         $result = array();
@@ -1284,13 +1427,25 @@ class Helper
         return $result;
     }
 
-    // system root
+    /**
+     * system root
+     * @return [type]
+     */
     public static function base()
     {
         return dirname(__FILE__);
     }
 
-    // translate service
+    /**
+     * translate service
+     * 
+     * @param mixed $section
+     * @param mixed $text
+     * @param string $language
+     * @param bool $force
+     * 
+     * @return [type]
+     */
     public static function t($section, $text, $language = "en", $force = false)
     {
         global $RapTToR_LANGUAGES;
@@ -1312,6 +1467,9 @@ class Helper
         return $text;
     }
 
+    /**
+     * @return [type]
+     */
     public static function unitsOfMeasurement()
     {
         $units = array(
@@ -1351,6 +1509,11 @@ class Helper
     /**
      * create statically.io CDN from image
      * $host defaults to ngrok, HTTP_HOST
+     * @param mixed $imageurl
+     * @param array $replace
+     * @param null $host
+     * 
+     * @return [type]
      */
     public static function cdnImage($imageurl, $replace = array(), $host = null)
     {
@@ -1371,8 +1534,15 @@ class Helper
     }
 
 
+
     /**
      * Save json to file + gzipped file.
+     * 
+     * @param mixed $file
+     * @param mixed $json
+     * @param bool $delete
+     * 
+     * @return [type]
      */
     public static function saveData($file, $json, $delete = false)
     {
@@ -1386,8 +1556,14 @@ class Helper
         return $okc && $ok;
     }
 
+
     /**
+     * 
      * Generate remote user UID
+     * 
+     * @param null $nick
+     * 
+     * @return [type]
      */
     public static function remoteUserId($nick = null)
     {
@@ -1402,6 +1578,10 @@ class Helper
 
     /**
      * Get php://input as array, and merge $_REQUEST if mapping on.
+     
+     * @param bool $map
+     * 
+     * @return [type]
      */
     public static function retrieveJsonPostData($map = false)
     {
@@ -1417,6 +1597,11 @@ class Helper
         }
     }
 
+    /**
+     * @param bool $notimelimit
+     * 
+     * @return [type]
+     */
     static public function showErrors($notimelimit = true)
     {
         ini_set('display_errors', 1);
@@ -1428,6 +1613,7 @@ class Helper
 
     /**
      * Social networks data
+     * @return [type]
      */
     public static function SocialNetworks()
     {
@@ -1474,6 +1660,7 @@ class Helper
 
     /**
      * Check if request call is from mobile phone
+     * @return [type]
      */
     public static function is_mobile()
     {
@@ -1514,14 +1701,14 @@ class Helper
     public static function metaData($options, $print = false)
     {
         $site = self::aVal($options, "site");
-        $title = self::aVal($options, "title");
-        $image = self::aVal($options, "image");
-        $description = self::aVal($options, "description");
-        $url = self::aVal($options, "url");
-        $fbid = self::aVal($options, "fbid", 0);
-        $fbusername = self::aVal($options, "fbusername", null);
-        $twitter = self::aVal($options, "creator", "rapttors");
-        $creator = self::aVal($options, "creator", "RapTToR");
+        $title = (string)self::aVal($options, "title");
+        $image = (string)self::aVal($options, "image");
+        $description = (string)self::aVal($options, "description");
+        $url = (string)self::aVal($options, "url");
+        $fbid = (string)self::aVal($options, "fbid", 0);
+        $fbusername = (string)self::aVal($options, "fbusername", null);
+        $twitter = (string)self::aVal($options, "creator", "rapttors");
+        $creator = (string)self::aVal($options, "creator", "RapTToR");
 
         $s = '
         <meta property="og:type" content="website" />
@@ -1547,6 +1734,12 @@ class Helper
         return $s;
     }
 
+    /**
+     * @param mixed $link
+     * @param mixed $print
+     * 
+     * @return [type]
+     */
     public static function shareOnLine($link, $print)
     {
         $s = "<script>
@@ -1614,47 +1807,83 @@ class Helper
 
 
 
+    /**
+     * @return [type]
+     */
     static public function repeat()
     {
-    ?>
+?>
         window.location.reload();
 <?php
     }
 
 
+    /**
+     * @return [type]
+     */
     static public function is_debug()
     {
         return isset($_REQUEST["debug"]) ? (int)$_REQUEST["debug"] : false;
     }
 
+    /**
+     * @return [type]
+     */
     static public function force()
     {
         return isset($_REQUEST["force"]) ? (int)$_REQUEST["force"] : false;
     }
 
 
+    /**
+     * @param mixed $str
+     * 
+     * @return [type]
+     */
     static public function uncompress($str)
     {
         $temp = @gzuncompress($str);
         return $temp;
     }
 
+    /**
+     * @param mixed $str
+     * 
+     * @return [type]
+     */
     static public function uncmp($str)
     {
         return self::uncompress(utf8_decode($str));
     }
 
-    static public function cmp($str)
-    {
-        return utf8_encode(self::compress($str));
-    }
 
+    /**
+     * @param mixed $str
+     * 
+     * @return [type]
+     */
     static public function compress($str)
     {
         $cmp = gzcompress($str, 9);
         return $cmp;
     }
 
+    /**
+     * @param mixed $str
+     * 
+     * @return [type]
+     */
+    static public function cmp($str)
+    {
+        return utf8_encode((string)self::compress($str));
+    }
+
+
+    /**
+     * @param mixed $str
+     * 
+     * @return [type]
+     */
     static public function isCompressed($str)
     {
         $ok = false;
@@ -1664,6 +1893,12 @@ class Helper
         return $ok;
     }
 
+    /**
+     * @param mixed $bucketid
+     * @param mixed $where
+     * 
+     * @return [type]
+     */
     public static function s3download($bucketid, $where)
     {
         $cmd = "aws s3 sync s3://$bucketid $where";
@@ -1732,6 +1967,9 @@ class Helper
 
 
 
+    /**
+     * @return [type]
+     */
     public static function backgrounds()
     {
         $dir = dirname(__FILE__) . '/../../images/videos/';
@@ -1743,6 +1981,9 @@ class Helper
         return $backgrounds;
     }
 
+    /**
+     * @return [type]
+     */
     public static function languages()
     {
         return array(
@@ -1772,6 +2013,9 @@ class Helper
 
 
 
+    /**
+     * @return [type]
+     */
     public function YesNo()
     {
         return array(
@@ -1783,6 +2027,11 @@ class Helper
 
 
 
+    /**
+     * @param mixed $cmd
+     * 
+     * @return [type]
+     */
     public static function exec($cmd)
     {
         $result = array();
@@ -1799,6 +2048,12 @@ class Helper
 
 
 
+    /**
+     * @param mixed $modelarr
+     * @param string $id
+     * 
+     * @return [type]
+     */
     public static function enumerate($modelarr, $id = "id")
     {
         $result = array();
@@ -1809,6 +2064,11 @@ class Helper
         return $result;
     }
 
+    /**
+     * @param mixed $text
+     * 
+     * @return [type]
+     */
     public static function mailText($text)
     {
         $text = self::br2nl($text);
@@ -1817,11 +2077,21 @@ class Helper
         return $text;
     }
 
+    /**
+     * @param mixed $text
+     * 
+     * @return [type]
+     */
     public static function htmlChars($text)
     {
         return htmlspecialchars($text, ENT_QUOTES);
     }
 
+    /**
+     * @param mixed $text
+     * 
+     * @return [type]
+     */
     public static function br2nl($text)
     {
         return str_ireplace(
@@ -1831,6 +2101,11 @@ class Helper
         );
     }
 
+    /**
+     * @param mixed $text
+     * 
+     * @return [type]
+     */
     public static function nbsp($text)
     {
         return str_ireplace(' ', '&nbsp;', $text);
@@ -1839,6 +2114,9 @@ class Helper
 
     /**
      * @param $t Tagging
+     * @param mixed $t
+     * 
+     * @return [type]
      */
     static public function isTestSet($t)
     {
@@ -1852,6 +2130,11 @@ class Helper
             $t->validatedby == 15);
     }
 
+    /**
+     * @param mixed $criteria
+     * 
+     * @return [type]
+     */
     static public function criteriaTestset($criteria)
     {
         $testsetfrom = "2020-09-18";
@@ -1867,6 +2150,9 @@ class Helper
         return $criteria;
     }
 
+    /**
+     * @return [type]
+     */
     public static function status()
     {
         return array(
@@ -1878,6 +2164,12 @@ class Helper
         );
     }
 
+    /**
+     * @param mixed $c
+     * @param bool $onlynew
+     * 
+     * @return [type]
+     */
     public static function unserialize($c, $onlynew = false)
     {
         $a = array();
@@ -1895,11 +2187,17 @@ class Helper
     }
 
 
+    /**
+     * @return [type]
+     */
     public static function storeDir()
     {
         return "../../front/data/";
     }
 
+    /**
+     * @return [type]
+     */
     public static function htmlNoCache()
     {
         return '
@@ -1922,6 +2220,7 @@ class Helper
         $str = $first_letter . $str_end;
         return $str;
     }
+
 
     public static function decontaminate_text(
         $text,
@@ -1981,6 +2280,11 @@ class Helper
         return $text;
     }
 
+    /**
+     * @param mixed $string
+     * 
+     * @return [type]
+     */
     public static function all2Lat($string)
     {
         $rus = array('š', 'Š', 'Đ', 'đ', 'Č', 'č', 'Ć', 'ć', 'Ž', 'ž');
@@ -1989,6 +2293,11 @@ class Helper
         return ($string);
     }
 
+    /**
+     * @param mixed $text
+     * 
+     * @return [type]
+     */
     public static function cp1250_to_utf2($text)
     {
         $dict  = array(
@@ -2006,6 +2315,11 @@ class Helper
     }
 
 
+    /**
+     * @param mixed $str
+     * 
+     * @return [type]
+     */
     public static function win2ascii($str)
     {
 
@@ -2068,6 +2382,12 @@ class Helper
         return $str;
     }
 
+    /**
+     * @param mixed $string
+     * @param bool $german
+     * 
+     * @return [type]
+     */
     public static function remove_accents($string, $german = false)
     {
         // Single letters
@@ -2088,6 +2408,13 @@ class Helper
         return $string;
     }
 
+    /**
+     * @param mixed $str
+     * @param mixed $from
+     * @param null $to
+     * 
+     * @return [type]
+     */
     public static function mb_strtr($str, $from, $to = null)
     {
         if (is_array($from)) {
@@ -2098,6 +2425,11 @@ class Helper
         return utf8_encode(strtr(utf8_decode($str), utf8_decode($from), utf8_decode($to)));
     }
 
+    /**
+     * @param mixed $cp1252
+     * 
+     * @return [type]
+     */
     public static function transcribe_cp1252_to_latin1($cp1252)
     {
         return strtr(
@@ -2115,6 +2447,11 @@ class Helper
         );
     }
 
+    /**
+     * @param mixed $str
+     * 
+     * @return [type]
+     */
     public static function remove_accent($str)
     {
         $a = array('À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ð', 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'ß', 'à', 'á', 'â', 'ã', 'ä', 'å', 'æ', 'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', 'ø', 'ù', 'ú', 'û', 'ü', 'ý', 'ÿ', 'Ā', 'ā', 'Ă', 'ă', 'Ą', 'ą', 'Ć', 'ć', 'Ĉ', 'ĉ', 'Ċ', 'ċ', 'Č', 'č', 'Ď', 'ď', 'Đ', 'đ', 'Ē', 'ē', 'Ĕ', 'ĕ', 'Ė', 'ė', 'Ę', 'ę', 'Ě', 'ě', 'Ĝ', 'ĝ', 'Ğ', 'ğ', 'Ġ', 'ġ', 'Ģ', 'ģ', 'Ĥ', 'ĥ', 'Ħ', 'ħ', 'Ĩ', 'ĩ', 'Ī', 'ī', 'Ĭ', 'ĭ', 'Į', 'į', 'İ', 'ı', 'Ĳ', 'ĳ', 'Ĵ', 'ĵ', 'Ķ', 'ķ', 'Ĺ', 'ĺ', 'Ļ', 'ļ', 'Ľ', 'ľ', 'Ŀ', 'ŀ', 'Ł', 'ł', 'Ń', 'ń', 'Ņ', 'ņ', 'Ň', 'ň', 'ŉ', 'Ō', 'ō', 'Ŏ', 'ŏ', 'Ő', 'ő', 'Œ', 'œ', 'Ŕ', 'ŕ', 'Ŗ', 'ŗ', 'Ř', 'ř', 'Ś', 'ś', 'Ŝ', 'ŝ', 'Ş', 'ş', 'Š', 'š', 'Ţ', 'ţ', 'Ť', 'ť', 'Ŧ', 'ŧ', 'Ũ', 'ũ', 'Ū', 'ū', 'Ŭ', 'ŭ', 'Ů', 'ů', 'Ű', 'ű', 'Ų', 'ų', 'Ŵ', 'ŵ', 'Ŷ', 'ŷ', 'Ÿ', 'Ź', 'ź', 'Ż', 'ż', 'Ž', 'ž', 'ſ', 'ƒ', 'Ơ', 'ơ', 'Ư', 'ư', 'Ǎ', 'ǎ', 'Ǐ', 'ǐ', 'Ǒ', 'ǒ', 'Ǔ', 'ǔ', 'Ǖ', 'ǖ', 'Ǘ', 'ǘ', 'Ǚ', 'ǚ', 'Ǜ', 'ǜ', 'Ǻ', 'ǻ', 'Ǽ', 'ǽ', 'Ǿ', 'ǿ');
@@ -2122,6 +2459,11 @@ class Helper
         return str_replace($a, $b, $str);
     }
 
+    /**
+     * @param mixed $string
+     * 
+     * @return [type]
+     */
     public static function normalizeText($string)
     {
         $table = array(
@@ -2196,6 +2538,12 @@ class Helper
         return strtr($string, $table);
     }
 
+    /**
+     * @param mixed $text
+     * @param string $encoding
+     * 
+     * @return [type]
+     */
     public static function w1250_to_utf8($text, $encoding = 'ISO-8859-2')
     {
         // map based on:
@@ -2262,6 +2610,11 @@ class Helper
     }
 
 
+    /**
+     * @param mixed $ws
+     * 
+     * @return [type]
+     */
     public static function normalizeString($ws)
     {
         $ws = str_ireplace(
@@ -2316,6 +2669,13 @@ class Helper
         return $s;
     }
 
+    /**
+     * @param mixed $w
+     * @param mixed $mn
+     * @param string $replace
+     * 
+     * @return [type]
+     */
     public static function removeAll($w, $mn, $replace = "")
     {
         while (stripos($w, $mn) > -1) {
@@ -2374,10 +2734,23 @@ class Helper
 
 
 
+    /**
+     * @param mixed $text
+     * 
+     * @return [type]
+     */
     public static function toutf8($text)
     {
         return iconv(mb_detect_encoding($text, mb_detect_order(), true), "UTF-8", $text);
     }
+
+
+    /**
+     * @param mixed $var
+     * @param  $deep
+     * 
+     * @return [type]
+     */
     public static function any2utf8($var, $deep = TRUE)
     {
         if (is_array($var)) {
