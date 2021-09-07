@@ -17,6 +17,7 @@ $RapTToR_LANGUAGES = array();
 class Helper
 {
 
+
     /**
      * @param mixed $v
      * 
@@ -30,8 +31,29 @@ class Helper
         echo '</textarea>';
     }
 
+    /**
+     * Pass string or integer to get valid date integer
+     * @param mixed $date
+     * @return [int] // date
+     */
+    public static function toDate($date)
+    {
+        if (!is_numeric($date) && is_string($date)) $date = strtotime($date);
+        if (is_numeric($date)) $date = date("Y-m-d", $date);
+        return $date;
+    }
 
-
+    /**
+     * Pass string or integer to get valid time integer
+     * @param mixed $date
+     * @return [int] // date
+     */
+    public static function toTime($date)
+    {
+        if (!is_numeric($date) && is_string($date)) $date = strtotime($date);
+        if (is_numeric($date)) $date = date("Y-m-d H:i:s", $date);
+        return $date;
+    }
 
 
 
@@ -301,7 +323,7 @@ class Helper
         return self::get($URL, $proxy = null, $agent = null, $debug = false, $data);
     }
 
-    
+
 
     /**
      * @param mixed $s
