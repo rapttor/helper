@@ -32,6 +32,21 @@ class Helper
     }
 
     /**
+     * Check if variable is a date;
+     * 
+     * @param mixed $v
+     * @returns [boolean]
+     */
+    public static function isDate($v)
+    {
+        $isDate = false;
+        if (is_null($v)) return false;
+        $y = (int)Date("Y", strtotime($v));
+        if ($y > 1971) $isDate = true;
+        return $isDate;
+    }
+
+    /**
      * Pass string or integer to get valid date integer
      * @param mixed $date
      * @return [int] // date
@@ -680,6 +695,23 @@ class Helper
     }
 
 
+    public static function Dow($id = null)
+    {
+        $a = array(
+            0 => Yii::t("front", "Sunday"),
+            1 => Yii::t("front", "Monday"),
+            2 => Yii::t("front", "Tuesday"),
+            3 => Yii::t("front", "Wednesday"),
+            4 => Yii::t("front", "Thursday"),
+            5 => Yii::t("front", "Friday"),
+            6 => Yii::t("front", "Saturday"),
+
+        );
+        if (!is_null($id) && isset($a[$id]))
+            return $a[$id];
+        return $a;
+    }
+
     /**
      * @param string $min_date
      * @param string $max_date
@@ -1244,6 +1276,71 @@ class Helper
         $debug = array("message" => $message, "type" => $type, "value" => $value);
         $RapTToR_HELPER["debug"][] = $debug;
         error_log(json_encode($debug));
+    }
+
+
+    static public function getCCType($cardNumber)
+    {
+        // Remove non-digits from the number
+        $cardNumber = preg_replace('/\D/', '', $cardNumber);
+
+        // Validate the length
+        $len = strlen($cardNumber);
+        if ($len < 15 || $len > 16) {
+            return false;
+        } else {
+            switch ($cardNumber) {
+                case (preg_match('/^4/', $cardNumber) >= 1):
+                    return 'VISA';
+                case (preg_match('/^5[1-5]/', $cardNumber) >= 1):
+                    return 'MASTERCARD';
+                case (preg_match('/^3[47]/', $cardNumber) >= 1):
+                    return 'AMEX';
+                case (preg_match('/^3(?:0[0-5]|[68])/', $cardNumber) >= 1):
+                    return 'DINERS';
+                case (preg_match('/^6(?:011|5)/', $cardNumber) >= 1):
+                    return 'DISCOVER';
+                case (preg_match('/^(?:2131|1800|35\d{3})/', $cardNumber) >= 1):
+                    return 'JCB';
+                default:
+                    // ALIPAY, AMEX, BANCONTACT, BONUS, DINERS, DIRECTDEBIT, EPRZELEWY, EPS, GIROPAY, IDEAL, INVOICE, JCB, KLARNA, MAESTRO, MASTERCARD, MYONE, PAYPAL, PAYDIREKT, POSTCARD, POSTFINANCE, SAFERPAYTEST, SOFORT, TWINT, UNIONPAY, VISA, VPAY, WLCRYPTOPAYMENTS.
+                    // return 'ALIPAY,AMEX,BANCONTACT,DINERS,DIRECTDEBIT,JCB,KLARNA,MAESTRO,MASTERCARD,POSTCARD,POSTFINANCE,TWINT,VISA';
+                    return false;
+            }
+        }
+    }
+
+    function validateCCChecksum($number)
+    {
+
+        // Remove non-digits from the number
+        $number = preg_replace('/\D/', '', $number);
+
+        // Get the string length and parity
+        $number_length = strlen($number);
+        $parity = $number_length % 2;
+
+        // Split up the number into single digits and get the total
+        $total = 0;
+        for ($i = 0; $i < $number_length; $i++) {
+            $digit = $number[$i];
+
+            // Multiply alternate digits by two
+            if ($i % 2 == $parity) {
+                $digit *= 2;
+
+                // If the sum is two digits, add them together
+                if ($digit > 9) {
+                    $digit -= 9;
+                }
+            }
+
+            // Sum up the digits
+            $total += $digit;
+        }
+
+        // If the total mod 10 equals 0, the number is valid
+        return ($total % 10 == 0) ? TRUE : FALSE;
     }
 
     /**
@@ -1914,6 +2011,14 @@ class Helper
         if (@gzuncompress($str1) !== false) $ok = true;
         return $ok;
     }
+
+
+
+
+
+
+
+
 
     /**
      * @param mixed $bucketid
@@ -2755,6 +2860,51 @@ class Helper
     }
 
 
+
+
+    /** LZW decompression
+     * @param string compressed binary data
+     * @return string original data
+     */
+    public static function lzw_decompress($binary)
+    {
+        // convert binary string to codes
+        $dictionary_count = 256;
+        $bits = 8; // ceil(log($dictionary_count, 2))
+        $codes = array();
+        $rest = 0;
+        $rest_length = 0;
+        for ($i = 0; $i < strlen($binary); $i++) {
+            $rest = ($rest << 8) + ord($binary[$i]);
+            $rest_length += 8;
+            if ($rest_length >= $bits) {
+                $rest_length -= $bits;
+                $codes[] = $rest >> $rest_length;
+                $rest &= (1 << $rest_length) - 1;
+                $dictionary_count++;
+                if ($dictionary_count >> $bits) {
+                    $bits++;
+                }
+            }
+        }
+
+        // decompression
+        $dictionary = range("\0", "\xFF");
+        $return = "";
+        $word = null;
+        foreach ($codes as $i => $code) {
+            $element = $dictionary[$code];
+            if (!isset($element)) {
+                $element = $word . $word[0];
+            }
+            $return .= $element;
+            if ($i) {
+                $dictionary[] = $word . $element[0];
+            }
+            $word = $element;
+        }
+        return $return;
+    }
 
     /**
      * @param mixed $text
