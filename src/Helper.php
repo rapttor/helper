@@ -1402,19 +1402,36 @@ class Helper
             case 'jpg':
                 return imagecreatefromjpeg($filename);
                 break;
-
             case 'png':
                 return imagecreatefrompng($filename);
                 break;
-
+            case 'bmp':
+                return imagecreatefrombmp($filename);
+                break;
+            case 'tga':
+                return imagecreatefromtga($filename);
+                break;
+            case 'xbm':
+                return imagecreatefromxbm($filename);
+                break;
+            case 'wbmp':
+                return imagecreatefromwbmp($filename);
+                break;
+            case 'xpm':
+                return imagecreatefromxpm($filename);
+                break;
             case 'gif':
                 return imagecreatefromgif($filename);
                 break;
-
+            case 'gd2':
+                return imagecreatefromgd2($filename);
+                break;
             default:
-                throw new \Exception('File "' . $filename . '" is not valid jpg, png or gif image.');
+                return null;
+                // throw new \Exception('File "' . $filename . '" is not valid jpg, png or gif image.');
                 break;
         }
+        return null;
     }
 
     /**
