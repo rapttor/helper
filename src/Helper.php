@@ -698,13 +698,13 @@ class Helper
     public static function Dow($id = null)
     {
         $a = array(
-            0 => Yii::t("front", "Sunday"),
-            1 => Yii::t("front", "Monday"),
-            2 => Yii::t("front", "Tuesday"),
-            3 => Yii::t("front", "Wednesday"),
-            4 => Yii::t("front", "Thursday"),
-            5 => Yii::t("front", "Friday"),
-            6 => Yii::t("front", "Saturday"),
+            0 => self::t("front", "Sunday"),
+            1 => self::t("front", "Monday"),
+            2 => self::t("front", "Tuesday"),
+            3 => self::t("front", "Wednesday"),
+            4 => self::t("front", "Thursday"),
+            5 => self::t("front", "Friday"),
+            6 => self::t("front", "Saturday"),
 
         );
         if (!is_null($id) && isset($a[$id]))
