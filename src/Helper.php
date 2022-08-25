@@ -2974,7 +2974,7 @@ class Helper
     }
 
 
-    public static function gender($id = null, $default="/")
+    public static function gender($id = null)
     {
         $result = array(
             0 => self::t('front', "Male"),
@@ -2982,10 +2982,8 @@ class Helper
             2 => self::t('front', "Rather not say"),
             3 => self::t('front', "Other"),
         );
-        if (!is_null($id)) { 
-            return (isset($result[$id]))?$result[$id]:"";
-        }
-        return $result;
+        return self::arrChoice($result, $id);
+    
     }
 
 
@@ -3020,6 +3018,163 @@ class Helper
         }
         return $r;
     }
+
+
+    public static function generateRandomString($size)
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $size; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
+
+
+
+    /**
+     * General method, get array value by id, if exists
+     * without parameter it return the options;
+     */
+    public static function arrChoice($arr, $i = null)
+    {
+        if (!is_null($i)) {
+            if (isset($arr[$i])) {
+                return $arr[$i];
+            } else return 0;
+        }
+        return $arr;
+    }
+
+
+
+    /**
+     * return html tag with star on for rating
+     */
+    public static function staron()
+    {
+        return '<i class="fa fa-star"></i>';
+    }
+
+    /**
+     * return html tag with star off for rating
+     */
+    public static function staroff()
+    {
+        return '<i class="fa fa-star-o"></i>';
+    }
+
+    /**
+     * Display $r stars on, and rest (out of 5) off
+     */
+    public static function stars($r)
+    {
+        $s = '';
+        for ($i = 0; $i < $r; $i++) $s .= self::staron();
+        for ($i = 0; $i < 5 - $r; $i++) $s .= self::staroff();
+        return $s;
+    }
+
+
+
+    /**
+     * Show oading rotating circle while ajax call is peformed
+     */
+    public static function loading($text = "Loading...")
+    {
+        $loading = "<i class='fa fa-spin fa-spinner'></i> " . $text;
+        return $loading;
+    }
+
+
+    public static function percentage($amount, $total, $decimals = 0)
+    {
+        $percent = 0;
+        if ($amount > 0 && $total > 0) {
+            $percent = 100 / $total * $amount;
+        }
+        return round($percent, $decimals);
+    }
+
+
+    public static function estimateReadingTime($text, $wpm = 200)
+    {
+        $totalWords = str_word_count(strip_tags($text));
+        $minutes = floor($totalWords / $wpm);
+        $seconds = floor($totalWords % $wpm / ($wpm / 60));
+
+        return array(
+            'minutes' => $minutes,
+            'seconds' => $seconds
+        );
+    }
+
+
+    public static function dateDiff($ts, $n = null)
+    {
+
+        if (is_null($n)) $n = time();
+
+        if (!ctype_digit($ts))
+            $ts = strtotime($ts);
+
+        $diff = $n - $ts;
+        if ($diff == 0)
+            return 'now';
+        elseif ($diff > 0) {
+            $day_diff = floor($diff / 86400);
+            if ($day_diff == 0) {
+                if ($diff < 60) return 'just now';
+                if ($diff < 120) return '1 minute ago';
+                if ($diff < 3600) return floor($diff / 60) . ' minutes ago';
+                if ($diff < 7200) return '1 hour ago';
+                if ($diff < 86400) return floor($diff / 3600) . ' hours ago';
+            }
+            if ($day_diff == 1) return 'Yesterday';
+            if ($day_diff < 7) return $day_diff . ' days ago';
+            if ($day_diff < 31) return ceil($day_diff / 7) . ' weeks ago';
+            if ($day_diff < 60) return 'last month';
+            return date('F Y', $ts);
+        } else {
+            $diff = abs($diff);
+            $day_diff = floor($diff / 86400);
+            if ($day_diff == 0) {
+                if ($diff < 120) return 'in a minute';
+                if ($diff < 3600) return 'in ' . floor($diff / 60) . ' minutes';
+                if ($diff < 7200) return 'in an hour';
+                if ($diff < 86400) return 'in ' . floor($diff / 3600) . ' hours';
+            }
+            if ($day_diff == 1) return 'Tomorrow';
+            if ($day_diff < 4) return date('l', $ts);
+            if ($day_diff < 7 + (7 - date('w'))) return 'next week';
+            if (ceil($day_diff / 7) < 4) return 'in ' . ceil($day_diff / 7) . ' weeks';
+            if (date('n', $ts) == date('n') + 1) return 'next month';
+            return date('F Y', $ts);
+        }
+    }
+
+
+    public function commandLineParams()
+    {
+        global $argv;
+        if (is_array($argv) && count($argv) > 0)
+            foreach ($argv as $k => $a)
+                if (stripos($a, "=") !== false) {
+                    $r = explode("=", $a);
+                    $_REQUEST[$r[0]] = $r[1];
+                } else {
+                    if ($k % 2 == 0 && $k > 1) {
+                        $_REQUEST[$argv[$k - 1]] = $argv[$k];
+                    }
+                }
+        return $_REQUEST;
+    }
+    
+
+
+
+
 
 
 }
