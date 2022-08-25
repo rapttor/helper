@@ -2825,8 +2825,6 @@ class Helper
         while (stripos($w, $mn) > -1) {
             $o = $w;
             $w = str_ireplace($mn, $replace, $w);
-            if (Helper::debug())
-                echo "$o -> - $mn = $w <br/>";
         }
         return $w;
     }
@@ -2976,6 +2974,52 @@ class Helper
     }
 
 
+    public static function gender($id = null, $default="/")
+    {
+        $result = array(
+            0 => self::t('front', "Male"),
+            1 => self::t('front', "Female"),
+            2 => self::t('front', "Rather not say"),
+            3 => self::t('front', "Other"),
+        );
+        if (!is_null($id)) { 
+            return (isset($result[$id]))?$result[$id]:"";
+        }
+        return $result;
+    }
+
+
+    public static function reIndex($a)
+    {
+        if (is_array($a)) {
+            $temp = array();
+            foreach ($a as $o)
+                $temp[$o->id] = $o;
+            return $temp;
+        }
+        return $a;
+    }
 
     
+
+    public static function isValidEmail($email)
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+        return true;
+    }
+
+
+    public static function arrOrValue($a, $i = null)
+    {
+        $r = $a;
+        if (!is_null($i)) {
+            $r = "";
+            if (isset($a[$i])) $r = $a[$i];
+        }
+        return $r;
+    }
+
+
 }
