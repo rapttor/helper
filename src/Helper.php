@@ -1,5 +1,7 @@
-<?php // ﷽‎
+<?php // ﷽
 namespace RapTToR;
+
+use GdImage;
 
 /**
  * @author rapttor
@@ -19,9 +21,9 @@ class Helper
 
 
     /**
-     * @param mixed $v
+     * `dump()` is a function that takes a variable as an argument and outputs it in a textarea
      * 
-     * @return [type]
+     * @param v The variable to dump.
      */
     public static function dump($v)
     {
@@ -324,19 +326,7 @@ class Helper
 
 
 
-    /**
-     * @param mixed $URL
-     * @param mixed $data
-     * @param null $proxy
-     * @param null $agent
-     * @param bool $debug
-     * 
-     * @return [type]
-     */
-    public static function post($URL, $data, $proxy = null, $agent = null, $debug = false)
-    {
-        return self::get($URL, $proxy = null, $agent = null, $debug = false, $data);
-    }
+    
 
 
 
@@ -1427,11 +1417,11 @@ class Helper
                 return imagecreatefromgd2($filename);
                 break;
             default:
-                return null;
+                return false;
                 // throw new \Exception('File "' . $filename . '" is not valid jpg, png or gif image.');
                 break;
         }
-        return null;
+        return false;
     }
 
     /**
@@ -2559,7 +2549,7 @@ class Helper
      * 
      * @return [type]
      */
-    public static function mb_strtr($str, $from, $to = null)
+    public static function mb_strtr($str, $from, $to = "")
     {
         if (is_array($from)) {
             $from = array_map('utf8_decode', $from);
@@ -2922,10 +2912,13 @@ class Helper
     }
 
     /**
-     * @param mixed $text
+     * It converts any text to UTF-8
      * 
-     * @return [type]
+     * @param text The text to be converted.
+     * 
+     * @return the text in UTF-8 format.
      */
+    
     public static function toutf8($text)
     {
         return iconv(mb_detect_encoding($text, mb_detect_order(), true), "UTF-8", $text);
@@ -2963,17 +2956,37 @@ class Helper
         }
     }
 
+    /**
+     * It encodes the data in base64url format.
+     * 
+     * @param data The data to be encoded.
+     * 
+     * @return The base64url_encode function is returning the base64 encoded string with the + and /
+     * characters replaced with - and _ characters.
+     */
     public static function base64url_encode($data)
     {
         return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }
 
+    /**
+     * It takes a base64url encoded string and converts it to a base64 encoded string
+     * 
+     * @param data The data to be encoded.
+     * 
+     * @return The base64url_decode function is returning the base64 decoded string.
+     */
     public static function base64url_decode($data)
     {
         return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT));
     }
 
 
+    /**
+     * It returns an array of gender options.
+     * 
+     * @param id The id of the option you want to return. If null, it will return the entire array.
+     */
     public static function gender($id = null)
     {
         $result = array(
@@ -2983,10 +2996,17 @@ class Helper
             3 => self::t('front', "Other"),
         );
         return self::arrChoice($result, $id);
-    
     }
 
 
+   /**
+    * It takes an array of objects and returns an array of objects indexed by the id property of the
+    * objects
+    * 
+    * @param a The array to re-index
+    * 
+    * @return An array of objects with the key being the id of the object.
+    */
     public static function reIndex($a)
     {
         if (is_array($a)) {
@@ -2998,8 +3018,15 @@ class Helper
         return $a;
     }
 
-    
 
+
+    /**
+     * If the email address is not valid, return false. Otherwise, return true
+     * 
+     * @param email The email address to validate.
+     * 
+     * @return A boolean value.
+     */
     public static function isValidEmail($email)
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -3009,6 +3036,14 @@ class Helper
     }
 
 
+    /**
+     * > If the second argument is null, return the first argument, otherwise return the value of the
+     * first argument at the index of the second argument
+     * 
+     * @param a The array to check
+     * @param i the index of the array you want to return. If you don't specify this, the entire array
+     * will be returned.
+     */
     public static function arrOrValue($a, $i = null)
     {
         $r = $a;
@@ -3020,6 +3055,13 @@ class Helper
     }
 
 
+    /**
+     * Generates a random string of a given size.
+     * 
+     * @param size The length of the string you want to generate.
+     * 
+     * @return A random string of characters.
+     */
     public static function generateRandomString($size)
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
@@ -3087,6 +3129,16 @@ class Helper
         return $loading;
     }
 
+    /**
+     * It takes an amount, a total, and a number of decimal places, and returns the percentage of the
+     * amount to the total
+     * 
+     * @param amount The amount to calculate the percentage for.
+     * @param total The total amount of items.
+     * @param decimals The number of decimal places to round to.
+     * 
+     * @return The percentage of the amount to the total.
+     */
 
     public static function percentage($amount, $total, $decimals = 0)
     {
@@ -3097,6 +3149,15 @@ class Helper
         return round($percent, $decimals);
     }
 
+/**
+ * It takes a string of text and returns an array with the number of minutes and seconds it would take
+ * to read it
+ * 
+ * @param text The text you want to estimate the reading time for.
+ * @param wpm Words per minute. This is the average reading speed of an adult.
+ * 
+ * @return An array with two keys, minutes and seconds.
+ */
 
     public static function estimateReadingTime($text, $wpm = 200)
     {
@@ -3111,6 +3172,14 @@ class Helper
     }
 
 
+    /**
+     * It takes a timestamp and returns a string like "2 hours ago", "3 days ago", "in 2 weeks", etc
+     * 
+     * @param ts The timestamp to compare to.
+     * @param n The current timestamp. If you don't set it, the current time will be used.
+     * 
+     * @return The difference between the current time and the time passed in.
+     */
     public static function dateDiff($ts, $n = null)
     {
 
@@ -3155,6 +3224,9 @@ class Helper
     }
 
 
+    /**
+     * It takes the command line arguments and puts them into the  array
+     */
     public function commandLineParams()
     {
         global $argv;
@@ -3170,11 +3242,4 @@ class Helper
                 }
         return $_REQUEST;
     }
-    
-
-
-
-
-
-
 }
