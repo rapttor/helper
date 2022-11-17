@@ -326,7 +326,7 @@ class Helper
 
 
 
-    
+
 
 
 
@@ -2918,7 +2918,7 @@ class Helper
      * 
      * @return the text in UTF-8 format.
      */
-    
+
     public static function toutf8($text)
     {
         return iconv(mb_detect_encoding($text, mb_detect_order(), true), "UTF-8", $text);
@@ -2999,14 +2999,14 @@ class Helper
     }
 
 
-   /**
-    * It takes an array of objects and returns an array of objects indexed by the id property of the
-    * objects
-    * 
-    * @param a The array to re-index
-    * 
-    * @return An array of objects with the key being the id of the object.
-    */
+    /**
+     * It takes an array of objects and returns an array of objects indexed by the id property of the
+     * objects
+     * 
+     * @param a The array to re-index
+     * 
+     * @return An array of objects with the key being the id of the object.
+     */
     public static function reIndex($a)
     {
         if (is_array($a)) {
@@ -3149,15 +3149,15 @@ class Helper
         return round($percent, $decimals);
     }
 
-/**
- * It takes a string of text and returns an array with the number of minutes and seconds it would take
- * to read it
- * 
- * @param text The text you want to estimate the reading time for.
- * @param wpm Words per minute. This is the average reading speed of an adult.
- * 
- * @return An array with two keys, minutes and seconds.
- */
+    /**
+     * It takes a string of text and returns an array with the number of minutes and seconds it would take
+     * to read it
+     * 
+     * @param text The text you want to estimate the reading time for.
+     * @param wpm Words per minute. This is the average reading speed of an adult.
+     * 
+     * @return An array with two keys, minutes and seconds.
+     */
 
     public static function estimateReadingTime($text, $wpm = 200)
     {
@@ -3242,4 +3242,21 @@ class Helper
                 }
         return $_REQUEST;
     }
+
+
+    /**
+     * It generates a random string of characters, hashes it, converts it to lowercase, splits it into
+     * groups of 6 characters, and joins them with a dash
+     * 
+     * Great to use as API key/secret generators
+     * 
+     * @param characters The total number of characters in the API key.
+     * @param group The number of characters to group together.
+     * 
+     * @return A string of characters that is 24 characters long, with a dash every 6 characters.
+     */
+    public function generateApiKey($characters = 24, $group = 6, $salt = "APP1", $prefix="APP")
+    {
+        return $prefix.'-'.implode('-', str_split(substr(strtolower(sha1($salt . microtime() . rand(1000, 9999))), 0, $characters), $group));
+    }    
 }
