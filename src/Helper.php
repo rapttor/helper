@@ -3255,7 +3255,7 @@ class Helper
      * 
      * @return A string of characters that is 24 characters long, with a dash every 6 characters.
      */
-    public function generateApiKey($characters = 24, $group = 6, $salt = "APP1", $prefix="APP")
+    public static function generateApiKey($characters = 24, $group = 6, $salt = "APP1", $prefix="APP")
     {
         return $prefix.'-'.implode('-', str_split(substr(strtolower(sha1($salt . microtime() . rand(1000, 9999))), 0, $characters), $group));
     }    
