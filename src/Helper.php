@@ -27,7 +27,8 @@ class Helper
      */
     public static function dump($v)
     {
-        if (is_string($v)) $v = htmlspecialchars($v, ENT_QUOTES);
+        if (is_string($v))
+            $v = htmlspecialchars($v, ENT_QUOTES);
         echo '<textarea style="margin-left:10%;width:88%;height:49vh;">';
         var_dump($v);
         echo '</textarea>';
@@ -42,9 +43,11 @@ class Helper
     public static function isDate($v)
     {
         $isDate = false;
-        if (is_null($v)) return false;
-        $y = (int)Date("Y", strtotime($v));
-        if ($y > 1971) $isDate = true;
+        if (is_null($v))
+            return false;
+        $y = (int) Date("Y", strtotime($v));
+        if ($y > 1971)
+            $isDate = true;
         return $isDate;
     }
 
@@ -55,8 +58,10 @@ class Helper
      */
     public static function toDate($date)
     {
-        if (!is_numeric($date) && is_string($date)) $date = strtotime($date);
-        if (is_numeric($date)) $date = date("Y-m-d", $date);
+        if (!is_numeric($date) && is_string($date))
+            $date = strtotime($date);
+        if (is_numeric($date))
+            $date = date("Y-m-d", $date);
         return $date;
     }
 
@@ -67,8 +72,10 @@ class Helper
      */
     public static function toTime($date)
     {
-        if (!is_numeric($date) && is_string($date)) $date = strtotime($date);
-        if (is_numeric($date)) $date = date("Y-m-d H:i:s", $date);
+        if (!is_numeric($date) && is_string($date))
+            $date = strtotime($date);
+        if (is_numeric($date))
+            $date = date("Y-m-d H:i:s", $date);
         return $date;
     }
 
@@ -103,9 +110,9 @@ class Helper
                 }
             }
         } else
-                if (is_string($a)) {
-            $r .= $a;
-        }
+            if (is_string($a)) {
+                $r .= $a;
+            }
         return $r;
     }
 
@@ -120,28 +127,29 @@ class Helper
      */
     public static function cleanup($meta, $bad = array())
     {
-        foreach ($meta as $k => $v) if (is_string($v)) {
-            $t = $v;
-            $t = trim(str_ireplace("\t", "", $t));
-            $t = \RapTToR\Helper::replaceAll("  ", " ", $t);
-            $t = str_ireplace($bad, "", $t);
-            $t = \RapTToR\Helper::replaceAll("&nbsp;", " ", $t);
-            $t = \RapTToR\Helper::replaceAll("\t", " ", $t);
-            $t = \RapTToR\Helper::replaceAll("\n", " ", $t);
-            $t = \RapTToR\Helper::replaceAll("\r", " ", $t);
+        foreach ($meta as $k => $v)
+            if (is_string($v)) {
+                $t = $v;
+                $t = trim(str_ireplace("\t", "", $t));
+                $t = \RapTToR\Helper::replaceAll("  ", " ", $t);
+                $t = str_ireplace($bad, "", $t);
+                $t = \RapTToR\Helper::replaceAll("&nbsp;", " ", $t);
+                $t = \RapTToR\Helper::replaceAll("\t", " ", $t);
+                $t = \RapTToR\Helper::replaceAll("\n", " ", $t);
+                $t = \RapTToR\Helper::replaceAll("\r", " ", $t);
 
-            //$clean = preg_replace( "/[^\p{L}|\p{N}]+/u", " ", $clean );
-            //$clean = preg_replace( "/[\p{Z}]{2,}/u", " ", $clean );
-            //$clean = preg_replace( '/[^\p{L}\p{N} ]+/', " ", $clean );
-            //$clean = preg_replace( '/\W+/', " ", $clean );
-            //$clean = preg_replace( "/[^[:alnum:][:space:]]/u", "", $clean );
+                //$clean = preg_replace( "/[^\p{L}|\p{N}]+/u", " ", $clean );
+                //$clean = preg_replace( "/[\p{Z}]{2,}/u", " ", $clean );
+                //$clean = preg_replace( '/[^\p{L}\p{N} ]+/', " ", $clean );
+                //$clean = preg_replace( '/\W+/', " ", $clean );
+                //$clean = preg_replace( "/[^[:alnum:][:space:]]/u", "", $clean );
 
-            for ($i = 0; $i < 32; $i++)
-                $t = str_ireplace(chr($i), "", $t);
-            $t = \RapTToR\Helper::replaceAll("  ", " ", $t);
-            $t = preg_replace('/\s+/', " ", $t);
-            $meta[$k] = $t;
-        }
+                for ($i = 0; $i < 32; $i++)
+                    $t = str_ireplace(chr($i), "", $t);
+                $t = \RapTToR\Helper::replaceAll("  ", " ", $t);
+                $t = preg_replace('/\s+/', " ", $t);
+                $meta[$k] = $t;
+            }
         return $meta;
     }
 
@@ -224,7 +232,8 @@ class Helper
         $result = "<script>
             document.location.reload();
         </script>";
-        if ($print) echo $result;
+        if ($print)
+            echo $result;
         return $result;
     }
 
@@ -252,7 +261,8 @@ class Helper
         $w = explode($glue, $date);
         $n = array();
         foreach ($w as $k => $m) {
-            if (!is_numeric($m)) $m = self::getEnglishMonthName($m, $lang);
+            if (!is_numeric($m))
+                $m = self::getEnglishMonthName($m, $lang);
             $n[$k] = $m;
         }
         return implode($glue, $n);
@@ -275,9 +285,7 @@ class Helper
         foreach ($month_numbers as $month)
             $english_months[] = strftime('%B', mktime(0, 0, 0, $month, 1, 2011));
 
-        setlocale(LC_ALL, $setlocale);
-
-        foreach ($month_numbers as $month)
+        setlocale(LC_ALL, $setlocale); foreach ($month_numbers as $month)
             $foreign_months[] = strftime('%B', mktime(0, 0, 0, $month, 1, 2011));
 
         return str_replace($foreign_months, $english_months, $foreignMonthName);
@@ -316,11 +324,14 @@ class Helper
         $n = array();
         if (is_array($a)) {
             foreach ($a as $k => $v) {
-                if (is_array($v)) $n[] = self::flat_array($v);
-                if (is_string($v)) $n[] = $v;
+                if (is_array($v))
+                    $n[] = self::flat_array($v);
+                if (is_string($v))
+                    $n[] = $v;
             }
         }
-        if (is_string($a)) $n[] = $a;
+        if (is_string($a))
+            $n[] = $a;
         return $n;
     }
 
@@ -338,8 +349,10 @@ class Helper
     public static function slug($s)
     {
         $o = $s;
-        if (is_array($s)) $s = serialize($s);
-        if (is_object($s)) $s = json_encode($s);
+        if (is_array($s))
+            $s = serialize($s);
+        if (is_object($s))
+            $s = json_encode($s);
         $s = self::cleanString($s);
         $s = str_replace(' ', '-', $s); // Replaces all spaces with hyphens.
         $s = preg_replace('/[^A-Za-z0-9\-]/', '', $s); // Removes special chars.
@@ -376,31 +389,31 @@ class Helper
 
         //2) Translation CP1252. &ndash; => -
         $trans = get_html_translation_table(HTML_ENTITIES);
-        $trans[chr(130)] = '&sbquo;';    // Single Low-9 Quotation Mark
-        $trans[chr(131)] = '&fnof;';    // Latin Small Letter F With Hook
-        $trans[chr(132)] = '&bdquo;';    // Double Low-9 Quotation Mark
-        $trans[chr(133)] = '&hellip;';    // Horizontal Ellipsis
-        $trans[chr(134)] = '&dagger;';    // Dagger
-        $trans[chr(135)] = '&Dagger;';    // Double Dagger
-        $trans[chr(136)] = '&circ;';    // Modifier Letter Circumflex Accent
-        $trans[chr(137)] = '&permil;';    // Per Mille Sign
-        $trans[chr(138)] = '&Scaron;';    // Latin Capital Letter S With Caron
-        $trans[chr(139)] = '&lsaquo;';    // Single Left-Pointing Angle Quotation Mark
-        $trans[chr(140)] = '&OElig;';    // Latin Capital Ligature OE
-        $trans[chr(145)] = '&lsquo;';    // Left Single Quotation Mark
-        $trans[chr(146)] = '&rsquo;';    // Right Single Quotation Mark
-        $trans[chr(147)] = '&ldquo;';    // Left Double Quotation Mark
-        $trans[chr(148)] = '&rdquo;';    // Right Double Quotation Mark
-        $trans[chr(149)] = '&bull;';    // Bullet
-        $trans[chr(150)] = '&ndash;';    // En Dash
-        $trans[chr(151)] = '&mdash;';    // Em Dash
-        $trans[chr(152)] = '&tilde;';    // Small Tilde
-        $trans[chr(153)] = '&trade;';    // Trade Mark Sign
-        $trans[chr(154)] = '&scaron;';    // Latin Small Letter S With Caron
-        $trans[chr(155)] = '&rsaquo;';    // Single Right-Pointing Angle Quotation Mark
-        $trans[chr(156)] = '&oelig;';    // Latin Small Ligature OE
-        $trans[chr(159)] = '&Yuml;';    // Latin Capital Letter Y With Diaeresis
-        $trans['euro'] = '&euro;';    // euro currency symbol
+        $trans[chr(130)] = '&sbquo;'; // Single Low-9 Quotation Mark
+        $trans[chr(131)] = '&fnof;'; // Latin Small Letter F With Hook
+        $trans[chr(132)] = '&bdquo;'; // Double Low-9 Quotation Mark
+        $trans[chr(133)] = '&hellip;'; // Horizontal Ellipsis
+        $trans[chr(134)] = '&dagger;'; // Dagger
+        $trans[chr(135)] = '&Dagger;'; // Double Dagger
+        $trans[chr(136)] = '&circ;'; // Modifier Letter Circumflex Accent
+        $trans[chr(137)] = '&permil;'; // Per Mille Sign
+        $trans[chr(138)] = '&Scaron;'; // Latin Capital Letter S With Caron
+        $trans[chr(139)] = '&lsaquo;'; // Single Left-Pointing Angle Quotation Mark
+        $trans[chr(140)] = '&OElig;'; // Latin Capital Ligature OE
+        $trans[chr(145)] = '&lsquo;'; // Left Single Quotation Mark
+        $trans[chr(146)] = '&rsquo;'; // Right Single Quotation Mark
+        $trans[chr(147)] = '&ldquo;'; // Left Double Quotation Mark
+        $trans[chr(148)] = '&rdquo;'; // Right Double Quotation Mark
+        $trans[chr(149)] = '&bull;'; // Bullet
+        $trans[chr(150)] = '&ndash;'; // En Dash
+        $trans[chr(151)] = '&mdash;'; // Em Dash
+        $trans[chr(152)] = '&tilde;'; // Small Tilde
+        $trans[chr(153)] = '&trade;'; // Trade Mark Sign
+        $trans[chr(154)] = '&scaron;'; // Latin Small Letter S With Caron
+        $trans[chr(155)] = '&rsaquo;'; // Single Right-Pointing Angle Quotation Mark
+        $trans[chr(156)] = '&oelig;'; // Latin Small Ligature OE
+        $trans[chr(159)] = '&Yuml;'; // Latin Capital Letter Y With Diaeresis
+        $trans['euro'] = '&euro;'; // euro currency symbol
         ksort($trans);
 
         foreach ($trans as $k => $v) {
@@ -520,8 +533,10 @@ class Helper
      */
     public static function timePassed($time)
     {
-        if (is_null($time) || $time == "") return "";
-        if (is_string($time)) $time = strtotime($time);
+        if (is_null($time) || $time == "")
+            return "";
+        if (is_string($time))
+            $time = strtotime($time);
         $time = time() - $time; // to get the time since that moment
         $time = ($time < 1) ? 1 : $time;
         $intPlural = 0;
@@ -711,7 +726,7 @@ class Helper
     public static function rand_date($min_date = "01-01-2016", $max_date = "31-12-2016")
     {
         /* Gets 2 dates as string, earlier and later date.
-           Returns date in between them.
+        Returns date in between them.
         */
 
         $min_epoch = strtotime($min_date);
@@ -742,7 +757,8 @@ class Helper
      */
     public static function link($url, $text = null, $options = 'target="_blank"')
     {
-        if (is_null($text)) $text = $url;
+        if (is_null($text))
+            $text = $url;
         $link = self::domain($url);
         return "<a href='$link' $options>$text</a>";
     }
@@ -779,7 +795,8 @@ class Helper
             }
         }
 
-        if (!$full) $string = array_slice($string, 0, 1);
+        if (!$full)
+            $string = array_slice($string, 0, 1);
         return $string ? implode(', ', $string) . ' ago' : 'just now';
     }
 
@@ -791,14 +808,17 @@ class Helper
      */
     public static function ago($tm, $rcs = 0)
     {
-        if (is_string($tm)) $tm = strtotime($tm);
+        if (is_string($tm))
+            $tm = strtotime($tm);
         $cur_tm = time();
         $dif = $cur_tm - $tm;
         $pds = array('second', 'minute', 'hour', 'day', 'week', 'month', 'year', 'decade');
         $lngh = array(1, 60, 3600, 86400, 604800, 2630880, 31570560, 315705600);
 
-        for ($v = sizeof($lngh) - 1; ($v >= 0) && (($no = $dif / $lngh[$v]) <= 1); $v--);
-        if ($v < 0) $v = 0;
+        for ($v = sizeof($lngh) - 1; ($v >= 0) && (($no = $dif / $lngh[$v]) <= 1); $v--)
+            ;
+        if ($v < 0)
+            $v = 0;
         $_tm = $cur_tm - ($dif % $lngh[$v]);
         $no = floor($no);
         if ($no <> 1)
@@ -838,7 +858,8 @@ class Helper
     public static function IconMenu($menu)
     {
         $result = "";
-        foreach ($menu as $m) $result .= self::Icon($m);
+        foreach ($menu as $m)
+            $result .= self::Icon($m);
         return $result;
     }
 
@@ -850,9 +871,11 @@ class Helper
     public static function Icon($i)
     {
         $result = "";
-        if (!isset($i["value"]) && isset($i["url"])) $i["value"] = $i["url"];
-        if (isset($i["value"]) && isset($i["ion"]) && isset($i["title"])) $result = "<div class='icontext' onclick='window.location.href=\"" .
-            $i["value"] . "\"'>
+        if (!isset($i["value"]) && isset($i["url"]))
+            $i["value"] = $i["url"];
+        if (isset($i["value"]) && isset($i["ion"]) && isset($i["title"]))
+            $result = "<div class='icontext' onclick='window.location.href=\"" .
+                $i["value"] . "\"'>
         <i class='{$i["ion"]}'></i>
         <small>{$i["title"]}</small>
         </div>";
@@ -869,7 +892,8 @@ class Helper
      */
     public static function aVal($a, $k, $d = "")
     {
-        if (is_object($a)) $a = (array)$a;
+        if (is_object($a))
+            $a = (array) $a;
         return (is_array($a) && isset($a[$k])) ? $a[$k] : $d;
     }
 
@@ -882,11 +906,15 @@ class Helper
      */
     public static function aFind($a, $k, $v)
     {
-        if (is_array($a)) foreach ($a as $item) {
-            if (is_array($item) && isset($item[$k]) && $item[$k] == $v) return $item;
-            if (is_object($item)) foreach ($item as $key => $value)
-                if ($k == $key && $v == $value) return $item;
-        }
+        if (is_array($a))
+            foreach ($a as $item) {
+                if (is_array($item) && isset($item[$k]) && $item[$k] == $v)
+                    return $item;
+                if (is_object($item))
+                    foreach ($item as $key => $value)
+                        if ($k == $key && $v == $value)
+                            return $item;
+            }
         return null;
     }
 
@@ -940,15 +968,15 @@ class Helper
             case JSON_ERROR_SYNTAX:
                 $error = 'Syntax error, malformed JSON.';
                 break;
-                // PHP >= 5.3.3
+            // PHP >= 5.3.3
             case JSON_ERROR_UTF8:
                 $error = 'Malformed UTF-8 characters, possibly incorrectly encoded.';
                 break;
-                // PHP >= 5.5.0
+            // PHP >= 5.5.0
             case JSON_ERROR_RECURSION:
                 $error = 'One or more recursive references in the value to be encoded.';
                 break;
-                // PHP >= 5.5.0
+            // PHP >= 5.5.0
             case JSON_ERROR_INF_OR_NAN:
                 $error = 'One or more NAN or INF values in the value to be encoded.';
                 break;
@@ -979,7 +1007,8 @@ class Helper
     public static function jsonValue($arr, $key, $def)
     {
         $value = $def;
-        if (isset($arr[$key]) && strlen(trim(strip_tags($arr[$key]))) > 2) $value = json_decode($arr[$key]);
+        if (isset($arr[$key]) && strlen(trim(strip_tags($arr[$key]))) > 2)
+            $value = json_decode($arr[$key]);
         return $value;
     }
 
@@ -1005,15 +1034,15 @@ class Helper
             case JSON_ERROR_SYNTAX:
                 $error = 'Syntax error, malformed JSON.';
                 break;
-                // PHP >= 5.3.3
+            // PHP >= 5.3.3
             case JSON_ERROR_UTF8:
                 $error = 'Malformed UTF-8 characters, possibly incorrectly encoded.';
                 break;
-                // PHP >= 5.5.0
+            // PHP >= 5.5.0
             case JSON_ERROR_RECURSION:
                 $error = 'One or more recursive references in the value to be encoded.';
                 break;
-                // PHP >= 5.5.0
+            // PHP >= 5.5.0
             case JSON_ERROR_INF_OR_NAN:
                 $error = 'One or more NAN or INF values in the value to be encoded.';
                 break;
@@ -1128,7 +1157,8 @@ class Helper
      */
     public static function replaceAll($what, $with, $str)
     {
-        while (stripos($str, $what)) $str = str_ireplace($what, $with, $str);
+        while (stripos($str, $what))
+            $str = str_ireplace($what, $with, $str);
         return $str;
     }
 
@@ -1154,7 +1184,7 @@ class Helper
             // you want to allow, and if so:
             header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
             header('Access-Control-Allow-Credentials: true');
-            header('Access-Control-Max-Age: 86400');    // cache for 1 day
+            header('Access-Control-Max-Age: 86400'); // cache for 1 day
         }
 
         // Access-Control headers are received during OPTIONS requests
@@ -1187,7 +1217,8 @@ class Helper
             $sorter[$ii] = $va[$key];
         }
         asort($sorter);
-        if ($desc) $sorter = array_reverse($sorter);
+        if ($desc)
+            $sorter = array_reverse($sorter);
         foreach ($sorter as $ii => $va) {
             $ret[$ii] = $array[$ii];
         }
@@ -1204,8 +1235,10 @@ class Helper
     public static function str2arr($str, $delimiter = ',')
     {
         $arr = array();
-        if (is_string($str)) $arr = explode($delimiter, $str);
-        foreach ($arr as $key => $value) $arr[$key] = trim($value);
+        if (is_string($str))
+            $arr = explode($delimiter, $str);
+        foreach ($arr as $key => $value)
+            $arr[$key] = trim($value);
         $arr = array_unique($arr);
         return $arr;
     }
@@ -1345,19 +1378,24 @@ class Helper
         $strTemplate = $strViewFile . ".php";
         $strResult = "";
         if (file_exists($strTemplate)) {
-            if (is_object($arVariables)) $arVariables = (array)$arVariables;
-            if (!is_null($sendthis)) $arVariables["this"] = $sendthis;
+            if (is_object($arVariables))
+                $arVariables = (array) $arVariables;
+            if (!is_null($sendthis))
+                $arVariables["this"] = $sendthis;
             extract($arVariables);
-            if ($return) ob_start();
+            if ($return)
+                ob_start();
             include($strTemplate);
-            if ($return) $strResult = ob_get_clean();
+            if ($return)
+                $strResult = ob_get_clean();
             if ($return) {
                 return $strResult;
             } else {
                 echo $strResult;
                 return true;
             }
-        } else return "Template not found $strViewFile";
+        } else
+            return "Template not found $strViewFile";
     }
 
     /**
@@ -1372,7 +1410,8 @@ class Helper
         while (($data = fgetcsv($filehandle, $rows, $delimiter)) !== FALSE) {
             call_user_func($callback, $data);
         }
-        if ($close) fclose($filehandle);
+        if ($close)
+            fclose($filehandle);
     }
 
 
@@ -1495,14 +1534,16 @@ class Helper
      */
     public static function arrWithValues($value)
     {
-        $arr = (array)$value;
+        $arr = (array) $value;
         $result = array();
         foreach ($arr as $key => $v) {
             $temp = json_encode($v);
             if (strlen($temp) > 2 && $temp !== "null") {
                 $result[$key] = $v;
-                if ((int)$v == $v && is_numeric($v)) $result[$key] = (int)$v;
-                if ((float)$v == $v && is_numeric($v)) $result[$key] = (float)$v;
+                if ((int) $v == $v && is_numeric($v))
+                    $result[$key] = (int) $v;
+                if ((float) $v == $v && is_numeric($v))
+                    $result[$key] = (float) $v;
             }
         }
         return $result;
@@ -1674,8 +1715,10 @@ class Helper
     {
         $cmp = gzcompress($json);
         if ($delete) {
-            if (is_file($file)) unlink($file);
-            if (is_file($file . '.gz')) unlink($file . '.gz');
+            if (is_file($file))
+                unlink($file);
+            if (is_file($file . '.gz'))
+                unlink($file . '.gz');
         }
         $okc = @file_put_contents($file . '.gz', $cmp);
         $ok = @file_put_contents($file, $json);
@@ -1703,12 +1746,12 @@ class Helper
     }
 
     /**
-     * Get php://input as array, and merge $_REQUEST if mapping on.
-     
-     * @param bool $map
-     * 
-     * @return [type]
-     */
+    * Get php://input as array, and merge $_REQUEST if mapping on.
+    
+    * @param bool $map
+    * 
+    * @return [type]
+    */
     public static function retrieveJsonPostData($map = false)
     {
         $rawData = file_get_contents("php://input");
@@ -1733,7 +1776,8 @@ class Helper
         ini_set('display_errors', 1);
         ini_set('display_startup_errors', 1);
         error_reporting(E_ALL);
-        if ($notimelimit) set_time_limit(-1);
+        if ($notimelimit)
+            set_time_limit(-1);
     }
 
 
@@ -1827,14 +1871,14 @@ class Helper
     public static function metaData($options, $print = false)
     {
         $site = self::aVal($options, "site");
-        $title = (string)self::aVal($options, "title");
-        $image = (string)self::aVal($options, "image");
-        $description = (string)self::aVal($options, "description");
-        $url = (string)self::aVal($options, "url");
-        $fbid = (string)self::aVal($options, "fbid", 0);
-        $fbusername = (string)self::aVal($options, "fbusername", null);
-        $twitter = (string)self::aVal($options, "creator", "rapttors");
-        $creator = (string)self::aVal($options, "creator", "RapTToR");
+        $title = (string) self::aVal($options, "title");
+        $image = (string) self::aVal($options, "image");
+        $description = (string) self::aVal($options, "description");
+        $url = (string) self::aVal($options, "url");
+        $fbid = (string) self::aVal($options, "fbid", 0);
+        $fbusername = (string) self::aVal($options, "fbusername", null);
+        $twitter = (string) self::aVal($options, "creator", "rapttors");
+        $creator = (string) self::aVal($options, "creator", "RapTToR");
 
         $s = '
         <meta property="og:type" content="website" />
@@ -1856,7 +1900,8 @@ class Helper
         <meta name="twitter:site" content="@website-username">
         ';
         }
-        if ($print) echo $s;
+        if ($print)
+            echo $s;
         return $s;
     }
 
@@ -1908,7 +1953,8 @@ class Helper
             <span class='linkedinShare'><i class='fa fa-linkedin'></i> linkedIn</span>
             </div>
             ";
-        if ($print) echo $s;
+        if ($print)
+            echo $s;
         return $s;
     }
 
@@ -1922,7 +1968,8 @@ class Helper
     {
         $n = file_get_contents("http://127.0.0.1:$port/api/tunnels");
         $j = json_decode($n, true);
-        if (is_null($param)) return $j;
+        if (is_null($param))
+            return $j;
         return (isset($j) && $j && is_array($j)
             && isset($j["tunnels"]) && is_array($j["tunnels"])
             && isset($j["tunnels"][$tunnel]) && is_array($j["tunnels"][0])
@@ -1938,9 +1985,9 @@ class Helper
      */
     static public function repeat()
     {
-?>
-        window.location.reload();
-<?php
+        ?>
+                window.location.reload();
+        <?php
     }
 
 
@@ -1949,7 +1996,7 @@ class Helper
      */
     static public function is_debug()
     {
-        return isset($_REQUEST["debug"]) ? (int)$_REQUEST["debug"] : false;
+        return isset($_REQUEST["debug"]) ? (int) $_REQUEST["debug"] : false;
     }
 
     /**
@@ -1957,7 +2004,7 @@ class Helper
      */
     static public function is_force()
     {
-        return isset($_REQUEST["force"]) ? (int)$_REQUEST["force"] : false;
+        return isset($_REQUEST["force"]) ? (int) $_REQUEST["force"] : false;
     }
 
 
@@ -2001,7 +2048,7 @@ class Helper
      */
     static public function cmp($str)
     {
-        return utf8_encode((string)self::compress($str));
+        return utf8_encode((string) self::compress($str));
     }
 
 
@@ -2014,8 +2061,10 @@ class Helper
     {
         $ok = false;
         $str1 = utf8_decode($str);
-        if (@gzuncompress($str) !== false) $ok = true;
-        if (@gzuncompress($str1) !== false) $ok = true;
+        if (@gzuncompress($str) !== false)
+            $ok = true;
+        if (@gzuncompress($str1) !== false)
+            $ok = true;
         return $ok;
     }
 
@@ -2074,8 +2123,7 @@ class Helper
             $d = new $class();
 
             foreach ($kv as $k => $v)
-                $d->$k = $v;
-            foreach ($attributes as $k => $v)
+                $d->$k = $v; foreach ($attributes as $k => $v)
                 $d->$k = $v;
             try {
                 $d->save();
@@ -2108,10 +2156,12 @@ class Helper
     {
         $dir = dirname(__FILE__) . '/../../images/videos/';
         $videos = scandir($dir);
-        if (is_array($videos)) foreach ($videos as $video) if (stripos($video, ".mp4")) {
-            $name = trim(str_ireplace(".mp4", "", $video));
-            $backgrounds[$name] = $video;
-        }
+        if (is_array($videos))
+            foreach ($videos as $video)
+                if (stripos($video, ".mp4")) {
+                    $name = trim(str_ireplace(".mp4", "", $video));
+                    $backgrounds[$name] = $video;
+                }
         return $backgrounds;
     }
 
@@ -2313,10 +2363,11 @@ class Helper
             $a = json_decode($c, true);
         }
         $new = array();
-        if (isset($a) && is_array($a)) foreach ($a as $v) {
-            $a[Helper::aVal($v, "name")] = Helper::aVal($v, "value");
-            $new[Helper::aVal($v, "name")] = Helper::aVal($v, "value");
-        }
+        if (isset($a) && is_array($a))
+            foreach ($a as $v) {
+                $a[Helper::aVal($v, "name")] = Helper::aVal($v, "value");
+                $new[Helper::aVal($v, "name")] = Helper::aVal($v, "value");
+            }
         return ($onlynew) ? $new : $a;
     }
 
@@ -2434,15 +2485,45 @@ class Helper
      */
     public static function cp1250_to_utf2($text)
     {
-        $dict  = array(
-            chr(225) => 'á', chr(228) =>  'ä', chr(232) => 'č', chr(239) => 'ď',
-            chr(233) => 'é', chr(236) => 'ě', chr(237) => 'í', chr(229) => 'ĺ', chr(229) => 'ľ',
-            chr(242) => 'ň', chr(244) => 'ô', chr(243) => 'ó', chr(154) => 'š', chr(248) => 'ř',
-            chr(250) => 'ú', chr(249) => 'ů', chr(157) => 'ť', chr(253) => 'ý', chr(158) => 'ž',
-            chr(193) => 'Á', chr(196) => 'Ä', chr(200) => 'Č', chr(207) => 'Ď', chr(201) => 'É',
-            chr(204) => 'Ě', chr(205) => 'Í', chr(197) => 'Ĺ',    chr(188) => 'Ľ', chr(210) => 'Ň',
-            chr(212) => 'Ô', chr(211) => 'Ó', chr(138) => 'Š', chr(216) => 'Ř', chr(218) => 'Ú',
-            chr(217) => 'Ů', chr(141) => 'Ť', chr(221) => 'Ý', chr(142) => 'Ž',
+        $dict = array(
+            chr(225) => 'á',
+            chr(228) => 'ä',
+            chr(232) => 'č',
+            chr(239) => 'ď',
+            chr(233) => 'é',
+            chr(236) => 'ě',
+            chr(237) => 'í',
+            chr(229) => 'ĺ',
+            chr(229) => 'ľ',
+            chr(242) => 'ň',
+            chr(244) => 'ô',
+            chr(243) => 'ó',
+            chr(154) => 'š',
+            chr(248) => 'ř',
+            chr(250) => 'ú',
+            chr(249) => 'ů',
+            chr(157) => 'ť',
+            chr(253) => 'ý',
+            chr(158) => 'ž',
+            chr(193) => 'Á',
+            chr(196) => 'Ä',
+            chr(200) => 'Č',
+            chr(207) => 'Ď',
+            chr(201) => 'É',
+            chr(204) => 'Ě',
+            chr(205) => 'Í',
+            chr(197) => 'Ĺ',
+            chr(188) => 'Ľ',
+            chr(210) => 'Ň',
+            chr(212) => 'Ô',
+            chr(211) => 'Ó',
+            chr(138) => 'Š',
+            chr(216) => 'Ř',
+            chr(218) => 'Ú',
+            chr(217) => 'Ů',
+            chr(141) => 'Ť',
+            chr(221) => 'Ý',
+            chr(142) => 'Ž',
             chr(150) => '-'
         );
         return strtr($text, $dict);
@@ -2459,37 +2540,41 @@ class Helper
 
         $old = $str;
 
-        if (false) $str = strtr(
-            $str,
-            "\xE1\xE8\xEF\xEC\xE9\xED\xF2",
-            "\x61\x63\x64\x65\x65\x69\x6E"
-        );
+        if (false)
+            $str = strtr(
+                $str,
+                "\xE1\xE8\xEF\xEC\xE9\xED\xF2",
+                "\x61\x63\x64\x65\x65\x69\x6E"
+            );
 
-        if (false) $str = strtr(
-            $str,
-            "\xF3\xF8\x9A\x9D\xF9\xFA\xFD\x9E\xF4\xBC\xBE",
-            "\x6F\x72\x73\x74\x75\x75\x79\x7A\x6F\x4C\x6C"
-        );
+        if (false)
+            $str = strtr(
+                $str,
+                "\xF3\xF8\x9A\x9D\xF9\xFA\xFD\x9E\xF4\xBC\xBE",
+                "\x6F\x72\x73\x74\x75\x75\x79\x7A\x6F\x4C\x6C"
+            );
 
-        if (false) $str = strtr(
-            $str,
-            "\xC1\xC8\xCF\xCC\xC9\xCD\xC2\xD3\xD8",
-            "\x41\x43\x44\x45\x45\x49\x4E\x4F\x52"
-        );
+        if (false)
+            $str = strtr(
+                $str,
+                "\xC1\xC8\xCF\xCC\xC9\xCD\xC2\xD3\xD8",
+                "\x41\x43\x44\x45\x45\x49\x4E\x4F\x52"
+            );
 
-        if (false) $str = strtr(
-            $str,
-            "\x8A\x8D\xDA\xDD\x8E\xD2\xD9\xEF\xCF",
-            "\x53\x54\x55\x59\x5A\x4E\x55\x64\x44"
-        );
+        if (false)
+            $str = strtr(
+                $str,
+                "\x8A\x8D\xDA\xDD\x8E\xD2\xD9\xEF\xCF",
+                "\x53\x54\x55\x59\x5A\x4E\x55\x64\x44"
+            );
 
         $str = strtr(
             $str,
             "\xE1\xE8\xEF\xEC\xE9\xED\xF2\xF3\xF8\x9A\x9D\xF9\xFA\xFD\x9E\xF4\xBC" .
-                "\xBE\xC1\xC8\xCF\xCC\xC9\xCD\xC2\xD3\xD8\x8A\x8D\xDA\xDD\x8E\xD2\xD9\xEF\xCF",
+            "\xBE\xC1\xC8\xCF\xCC\xC9\xCD\xC2\xD3\xD8\x8A\x8D\xDA\xDD\x8E\xD2\xD9\xEF\xCF",
 
             "\x61\x63\x64\x65\x65\x69\x6E\x6F\x72\x73\x74\x75\x75\x79\x7A\x6F\x4C" .
-                "\x6C\x41\x43\x44\x45\x45\x49\x4E\x4F\x52\x53\x54\x55\x59\x5A\x4E\x55\x64\x44"
+            "\x6C\x41\x43\x44\x45\x45\x49\x4E\x4F\x52\x53\x54\x55\x59\x5A\x4E\x55\x64\x44"
         );
 
         $str = strtr(
@@ -2511,7 +2596,7 @@ class Helper
         $str = strtr($str, array("\xC4" => "Ae", "\xC6" => "AE", "\xD6" => "Oe", "\xDC" => "Ue", "\xDE" => "TH", "\xDF" => "ss", "\xE4" => "ae", "\xE6" => "ae", "\xF6" => "oe", "\xFC" => "ue", "\xFE" => "th"));
 
         /* if (stripos($old, 'dij') == false && stripos($str, 'dij') != false)
-            $str = str_ireplace('dij', 'dj', $str); */
+        $str = str_ireplace('dij', 'dj', $str); */
 
         return $str;
     }
@@ -2537,7 +2622,8 @@ class Helper
         $umlauts = array("Ä" => "Ae", "ä" => "ae", "Ö" => "Oe", "ö" => "oe", "Ü" => "Ue", "ü" => "ue");
         // Replace
         $replacements = array_merge($single, $ligatures);
-        if ($german) $replacements = array_merge($replacements, $umlauts);
+        if ($german)
+            $replacements = array_merge($replacements, $umlauts);
         $string = strtr($string, $replacements);
         return $string;
     }
@@ -2569,14 +2655,38 @@ class Helper
         return strtr(
             $cp1252,
             array(
-                "\x80" => "e",  "\x81" => " ",    "\x82" => "'", "\x83" => 'f',
-                "\x84" => '"',  "\x85" => "...",  "\x86" => "+", "\x87" => "#",
-                "\x88" => "^",  "\x89" => "0/00", "\x8A" => "S", "\x8B" => "<",
-                "\x8C" => "OE", "\x8D" => " ",    "\x8E" => "Z", "\x8F" => " ",
-                "\x90" => " ",  "\x91" => "`",    "\x92" => "'", "\x93" => '"',
-                "\x94" => '"',  "\x95" => "*",    "\x96" => "-", "\x97" => "--",
-                "\x98" => "~",  "\x99" => "(TM)", "\x9A" => "s", "\x9B" => ">",
-                "\x9C" => "oe", "\x9D" => " ",    "\x9E" => "z", "\x9F" => "Y"
+                "\x80" => "e",
+                "\x81" => " ",
+                "\x82" => "'",
+                "\x83" => 'f',
+                "\x84" => '"',
+                "\x85" => "...",
+                "\x86" => "+",
+                "\x87" => "#",
+                "\x88" => "^",
+                "\x89" => "0/00",
+                "\x8A" => "S",
+                "\x8B" => "<",
+                "\x8C" => "OE",
+                "\x8D" => " ",
+                "\x8E" => "Z",
+                "\x8F" => " ",
+                "\x90" => " ",
+                "\x91" => "`",
+                "\x92" => "'",
+                "\x93" => '"',
+                "\x94" => '"',
+                "\x95" => "*",
+                "\x96" => "-",
+                "\x97" => "--",
+                "\x98" => "~",
+                "\x99" => "(TM)",
+                "\x9A" => "s",
+                "\x9B" => ">",
+                "\x9C" => "oe",
+                "\x9D" => " ",
+                "\x9E" => "z",
+                "\x9F" => "Y"
             )
         );
     }
@@ -2601,14 +2711,79 @@ class Helper
     public static function normalizeText($string)
     {
         $table = array(
-            'Š' => 'S', 'š' => 's', 'Đ' => 'Dj', 'đ' => 'dj', 'Ž' => 'Z', 'ž' => 'z', 'Č' => 'C', 'č' => 'c', 'Ć' => 'C', 'ć' => 'c',
-            'À' => 'A', 'Á' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 'Å' => 'A', 'Æ' => 'A', 'Ç' => 'C', 'È' => 'E', 'É' => 'E',
-            'Ê' => 'E', 'Ë' => 'E', 'Ì' => 'I', 'Í' => 'I', 'Î' => 'I', 'Ï' => 'I', 'Ñ' => 'N', 'Ò' => 'O', 'Ó' => 'O', 'Ô' => 'O',
-            'Õ' => 'O', 'Ö' => 'O', 'Ø' => 'O', 'Ù' => 'U', 'Ú' => 'U', 'Û' => 'U', 'Ü' => 'U', 'Ý' => 'Y', 'Þ' => 'B', 'ß' => 'Ss',
-            'à' => 'a', 'á' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a', 'å' => 'a', 'æ' => 'a', 'ç' => 'c', 'è' => 'e', 'é' => 'e',
-            'ê' => 'e', 'ë' => 'e', 'ì' => 'i', 'í' => 'i', 'î' => 'i', 'ï' => 'i', 'ð' => 'o', 'ñ' => 'n', 'ò' => 'o', 'ó' => 'o',
-            'ô' => 'o', 'õ' => 'o', 'ö' => 'o', 'ø' => 'o', 'ù' => 'u', 'ú' => 'u', 'û' => 'u', 'ý' => 'y', 'ý' => 'y', 'þ' => 'b',
-            'ÿ' => 'y', 'Ŕ' => 'R', 'ŕ' => 'r',
+            'Š' => 'S',
+            'š' => 's',
+            'Đ' => 'Dj',
+            'đ' => 'dj',
+            'Ž' => 'Z',
+            'ž' => 'z',
+            'Č' => 'C',
+            'č' => 'c',
+            'Ć' => 'C',
+            'ć' => 'c',
+            'À' => 'A',
+            'Á' => 'A',
+            'Â' => 'A',
+            'Ã' => 'A',
+            'Ä' => 'A',
+            'Å' => 'A',
+            'Æ' => 'A',
+            'Ç' => 'C',
+            'È' => 'E',
+            'É' => 'E',
+            'Ê' => 'E',
+            'Ë' => 'E',
+            'Ì' => 'I',
+            'Í' => 'I',
+            'Î' => 'I',
+            'Ï' => 'I',
+            'Ñ' => 'N',
+            'Ò' => 'O',
+            'Ó' => 'O',
+            'Ô' => 'O',
+            'Õ' => 'O',
+            'Ö' => 'O',
+            'Ø' => 'O',
+            'Ù' => 'U',
+            'Ú' => 'U',
+            'Û' => 'U',
+            'Ü' => 'U',
+            'Ý' => 'Y',
+            'Þ' => 'B',
+            'ß' => 'Ss',
+            'à' => 'a',
+            'á' => 'a',
+            'â' => 'a',
+            'ã' => 'a',
+            'ä' => 'a',
+            'å' => 'a',
+            'æ' => 'a',
+            'ç' => 'c',
+            'è' => 'e',
+            'é' => 'e',
+            'ê' => 'e',
+            'ë' => 'e',
+            'ì' => 'i',
+            'í' => 'i',
+            'î' => 'i',
+            'ï' => 'i',
+            'ð' => 'o',
+            'ñ' => 'n',
+            'ò' => 'o',
+            'ó' => 'o',
+            'ô' => 'o',
+            'õ' => 'o',
+            'ö' => 'o',
+            'ø' => 'o',
+            'ù' => 'u',
+            'ú' => 'u',
+            'û' => 'u',
+            'ý' => 'y',
+            'ý' => 'y',
+            'þ' => 'b',
+            'ÿ' => 'y',
+            'Ŕ' => 'R',
+            'ŕ' => 'r',
             chr(0x8A) => chr(0xA9),
             chr(0x8C) => chr(0xA6),
             chr(0x8D) => chr(0xAB),
@@ -2650,23 +2825,77 @@ class Helper
             chr(0xB6) => '&para;',
             chr(0xB7) => '&middot;',
             chr(0xBB) => '&raquo;',
-            "\x80" => "e",  "\x81" => " ",    "\x82" => "'", "\x83" => 'f',
-            "\x84" => '"',  "\x85" => "...",  "\x86" => "+", "\x87" => "#",
-            "\x88" => "^",  "\x89" => "0/00", "\x8A" => "S", "\x8B" => "<",
-            "\x8C" => "OE", "\x8D" => " ",    "\x8E" => "Z", "\x8F" => " ",
-            "\x90" => " ",  "\x91" => "`",    "\x92" => "'", "\x93" => '"',
-            "\x94" => '"',  "\x95" => "*",    "\x96" => "-", "\x97" => "--",
-            "\x98" => "~",  "\x99" => "(TM)", "\x9A" => "s", "\x9B" => ">",
-            "\x9C" => "oe", "\x9D" => " ",    "\x9E" => "z", "\x9F" => "Y",
+            "\x80" => "e",
+            "\x81" => " ",
+            "\x82" => "'",
+            "\x83" => 'f',
+            "\x84" => '"',
+            "\x85" => "...",
+            "\x86" => "+",
+            "\x87" => "#",
+            "\x88" => "^",
+            "\x89" => "0/00",
+            "\x8A" => "S",
+            "\x8B" => "<",
+            "\x8C" => "OE",
+            "\x8D" => " ",
+            "\x8E" => "Z",
+            "\x8F" => " ",
+            "\x90" => " ",
+            "\x91" => "`",
+            "\x92" => "'",
+            "\x93" => '"',
+            "\x94" => '"',
+            "\x95" => "*",
+            "\x96" => "-",
+            "\x97" => "--",
+            "\x98" => "~",
+            "\x99" => "(TM)",
+            "\x9A" => "s",
+            "\x9B" => ">",
+            "\x9C" => "oe",
+            "\x9D" => " ",
+            "\x9E" => "z",
+            "\x9F" => "Y",
             // ---
-            chr(225) => 'á', chr(228) =>  'ä', chr(232) => 'č', chr(239) => 'ď',
-            chr(233) => 'é', chr(236) => 'ě', chr(237) => 'í', chr(229) => 'ĺ', chr(229) => 'ľ',
-            chr(242) => 'ň', chr(244) => 'ô', chr(243) => 'ó', chr(154) => 'š', chr(248) => 'ř',
-            chr(250) => 'ú', chr(249) => 'ů', chr(157) => 'ť', chr(253) => 'ý', chr(158) => 'ž',
-            chr(193) => 'Á', chr(196) => 'Ä', chr(200) => 'Č', chr(207) => 'Ď', chr(201) => 'É',
-            chr(204) => 'Ě', chr(205) => 'Í', chr(197) => 'Ĺ',    chr(188) => 'Ľ', chr(210) => 'Ň',
-            chr(212) => 'Ô', chr(211) => 'Ó', chr(138) => 'Š', chr(216) => 'Ř', chr(218) => 'Ú',
-            chr(217) => 'Ů', chr(141) => 'Ť', chr(221) => 'Ý', chr(142) => 'Ž',
+            chr(225) => 'á',
+            chr(228) => 'ä',
+            chr(232) => 'č',
+            chr(239) => 'ď',
+            chr(233) => 'é',
+            chr(236) => 'ě',
+            chr(237) => 'í',
+            chr(229) => 'ĺ',
+            chr(229) => 'ľ',
+            chr(242) => 'ň',
+            chr(244) => 'ô',
+            chr(243) => 'ó',
+            chr(154) => 'š',
+            chr(248) => 'ř',
+            chr(250) => 'ú',
+            chr(249) => 'ů',
+            chr(157) => 'ť',
+            chr(253) => 'ý',
+            chr(158) => 'ž',
+            chr(193) => 'Á',
+            chr(196) => 'Ä',
+            chr(200) => 'Č',
+            chr(207) => 'Ď',
+            chr(201) => 'É',
+            chr(204) => 'Ě',
+            chr(205) => 'Í',
+            chr(197) => 'Ĺ',
+            chr(188) => 'Ľ',
+            chr(210) => 'Ň',
+            chr(212) => 'Ô',
+            chr(211) => 'Ó',
+            chr(138) => 'Š',
+            chr(216) => 'Ř',
+            chr(218) => 'Ú',
+            chr(217) => 'Ů',
+            chr(141) => 'Ť',
+            chr(221) => 'Ý',
+            chr(142) => 'Ž',
             chr(150) => '-',
         );
         return strtr($string, $table);
@@ -2738,7 +2967,8 @@ class Helper
      */
     public static function replaceText($s, $a)
     {
-        if (is_string($a)) $a = array(0 => array($a), 1 => array(""));
+        if (is_string($a))
+            $a = array(0 => array($a), 1 => array(""));
         $s = str_ireplace($a[0], $a[1], $s);
         return $s;
     }
@@ -2793,11 +3023,12 @@ class Helper
     public static function a2w($a, $words)
     {
         $t = array_flip($words);
-        foreach ($a as $k => $i) if (is_numeric($i)) {
-            if (isset($t[$i])) {
-                $a[$k] = $t[$i];
+        foreach ($a as $k => $i)
+            if (is_numeric($i)) {
+                if (isset($t[$i])) {
+                    $a[$k] = $t[$i];
+                }
             }
-        }
         $s = implode(' ', $a);
         $s = self::normalizeString($s);
         return $s;
@@ -2825,7 +3056,7 @@ class Helper
      * @param string data to compress
      * @return string binary data
      */
-    public static  function lzw_compress($string)
+    public static function lzw_compress($string)
     {
         // compression
         $dictionary = array_flip(range("\0", "\xFF"));
@@ -3049,7 +3280,8 @@ class Helper
         $r = $a;
         if (!is_null($i)) {
             $r = "";
-            if (isset($a[$i])) $r = $a[$i];
+            if (isset($a[$i]))
+                $r = $a[$i];
         }
         return $r;
     }
@@ -3084,7 +3316,8 @@ class Helper
         if (!is_null($i)) {
             if (isset($arr[$i])) {
                 return $arr[$i];
-            } else return 0;
+            } else
+                return 0;
         }
         return $arr;
     }
@@ -3108,13 +3341,21 @@ class Helper
     }
 
     /**
-     * Display $r stars on, and rest (out of 5) off
+     * The function "stars" returns a string of stars and non-stars based on the input value.
+     * 
+     * @param r The parameter "r" in the "stars" function represents the number of stars to be turned
+     * on.
+     * 
+     * @return a string of stars, where the number of "on" stars is equal to the input parameter ``,
+     * and the number of "off" stars is equal to `5 - `.
      */
     public static function stars($r)
     {
         $s = '';
-        for ($i = 0; $i < $r; $i++) $s .= self::staron();
-        for ($i = 0; $i < 5 - $r; $i++) $s .= self::staroff();
+        for ($i = 0; $i < $r; $i++)
+            $s .= self::staron();
+        for ($i = 0; $i < 5 - $r; $i++)
+            $s .= self::staroff();
         return $s;
     }
 
@@ -3183,7 +3424,8 @@ class Helper
     public static function dateDiff($ts, $n = null)
     {
 
-        if (is_null($n)) $n = time();
+        if (is_null($n))
+            $n = time();
 
         if (!ctype_digit($ts))
             $ts = strtotime($ts);
@@ -3194,38 +3436,60 @@ class Helper
         elseif ($diff > 0) {
             $day_diff = floor($diff / 86400);
             if ($day_diff == 0) {
-                if ($diff < 60) return 'just now';
-                if ($diff < 120) return '1 minute ago';
-                if ($diff < 3600) return floor($diff / 60) . ' minutes ago';
-                if ($diff < 7200) return '1 hour ago';
-                if ($diff < 86400) return floor($diff / 3600) . ' hours ago';
+                if ($diff < 60)
+                    return 'just now';
+                if ($diff < 120)
+                    return '1 minute ago';
+                if ($diff < 3600)
+                    return floor($diff / 60) . ' minutes ago';
+                if ($diff < 7200)
+                    return '1 hour ago';
+                if ($diff < 86400)
+                    return floor($diff / 3600) . ' hours ago';
             }
-            if ($day_diff == 1) return 'Yesterday';
-            if ($day_diff < 7) return $day_diff . ' days ago';
-            if ($day_diff < 31) return ceil($day_diff / 7) . ' weeks ago';
-            if ($day_diff < 60) return 'last month';
+            if ($day_diff == 1)
+                return 'Yesterday';
+            if ($day_diff < 7)
+                return $day_diff . ' days ago';
+            if ($day_diff < 31)
+                return ceil($day_diff / 7) . ' weeks ago';
+            if ($day_diff < 60)
+                return 'last month';
             return date('F Y', $ts);
         } else {
             $diff = abs($diff);
             $day_diff = floor($diff / 86400);
             if ($day_diff == 0) {
-                if ($diff < 120) return 'in a minute';
-                if ($diff < 3600) return 'in ' . floor($diff / 60) . ' minutes';
-                if ($diff < 7200) return 'in an hour';
-                if ($diff < 86400) return 'in ' . floor($diff / 3600) . ' hours';
+                if ($diff < 120)
+                    return 'in a minute';
+                if ($diff < 3600)
+                    return 'in ' . floor($diff / 60) . ' minutes';
+                if ($diff < 7200)
+                    return 'in an hour';
+                if ($diff < 86400)
+                    return 'in ' . floor($diff / 3600) . ' hours';
             }
-            if ($day_diff == 1) return 'Tomorrow';
-            if ($day_diff < 4) return date('l', $ts);
-            if ($day_diff < 7 + (7 - date('w'))) return 'next week';
-            if (ceil($day_diff / 7) < 4) return 'in ' . ceil($day_diff / 7) . ' weeks';
-            if (date('n', $ts) == date('n') + 1) return 'next month';
+            if ($day_diff == 1)
+                return 'Tomorrow';
+            if ($day_diff < 4)
+                return date('l', $ts);
+            if ($day_diff < 7 + (7 - date('w')))
+                return 'next week';
+            if (ceil($day_diff / 7) < 4)
+                return 'in ' . ceil($day_diff / 7) . ' weeks';
+            if (date('n', $ts) == date('n') + 1)
+                return 'next month';
             return date('F Y', $ts);
         }
     }
 
 
     /**
-     * It takes the command line arguments and puts them into the  array
+     * This function retrieves command line parameters and stores them in the  array.
+     * 
+     * @return an array of command line parameters passed to the script. It parses the `` global
+     * variable and converts the parameters into key-value pairs in the `` superglobal array.
+     * The function then returns the `` array.
      */
     public function commandLineParams()
     {
@@ -3255,8 +3519,23 @@ class Helper
      * 
      * @return A string of characters that is 24 characters long, with a dash every 6 characters.
      */
-    public static function generateApiKey($characters = 24, $group = 6, $salt = "APP1", $prefix="APP")
+    public static function generateApiKey($characters = 24, $group = 6, $salt = "APP1", $prefix = "APP")
     {
-        return $prefix.'-'.implode('-', str_split(substr(strtolower(sha1($salt . microtime() . rand(1000, 9999))), 0, $characters), $group));
-    }    
+        return $prefix . '-' . implode('-', str_split(substr(strtolower(sha1($salt . microtime() . rand(1000, 9999))), 0, $characters), $group));
+    }
+
+
+    /**
+     * This function flushes the output buffer and sleeps for 1 second.
+     */
+    public static function flushProgress()
+    {
+        if (ob_get_level() == 0)
+            ob_start();
+        ob_flush();
+        flush();
+        usleep(1);
+        ob_end_flush();
+        ob_start();
+    }
 }
