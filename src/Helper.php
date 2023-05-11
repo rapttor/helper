@@ -359,6 +359,46 @@ class Helper
         return $s;
     }
 
+    /**
+     * The function takes a string and converts it into a URL-friendly slug format by replacing
+     * non-letter or digit characters with a divider, transliterating, removing unwanted characters,
+     * trimming, removing duplicate dividers, and converting to lowercase.
+     * 
+     * @param text The string that needs to be converted into a slug.
+     * @param divider The character used to replace non-letter or non-digit characters in the input
+     * text. By default, it is set to '-' (hyphen).
+     * 
+     * @return a string that has been converted to a slug format, which means it has been modified to
+     * be more suitable for use in URLs and filenames. The returned string contains only lowercase
+     * letters, digits, and hyphens, with no spaces or special characters. If the input string is
+     * empty, the function returns the string "n-a".
+     */
+    public static function slugify($text, $divider = '-')
+    {
+        // replace non letter or digits by divider
+        $text = preg_replace('~[^\pL\d]+~u', $divider, $text);
+
+        // transliterate
+        $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+
+        // remove unwanted characters
+        $text = preg_replace('~[^-\w]+~', '', $text);
+
+        // trim
+        $text = trim($text, $divider);
+
+        // remove duplicate divider
+        $text = preg_replace('~-+~', $divider, $text);
+
+        // lowercase
+        $text = strtolower($text);
+
+        if (empty($text)) {
+            return 'n-a';
+        }
+
+        return $text;
+    }
 
     /**
      * @param mixed $text
@@ -1986,8 +2026,8 @@ class Helper
     static public function repeat()
     {
         ?>
-                window.location.reload();
-        <?php
+                        window.location.reload();
+                <?php
     }
 
 
@@ -3537,5 +3577,344 @@ class Helper
         usleep(1);
         ob_end_flush();
         ob_start();
+    }
+
+    /**
+     * The function checks if a given date string is valid according to a specified format in PHP.
+     * 
+     * @param date The date string that needs to be validated. It should be in the format specified by
+     * the  parameter (default is 'Y-m-d', which represents year-month-day format).
+     * @param format The format parameter specifies the format of the date string passed as the first
+     * argument to the function isAValidDate(). The default format is 'Y-m-d', which represents the
+     * date in the format of year-month-day. However, you can pass any valid date format string to this
+     * parameter.
+     * 
+     * @return The function `isAValidDate` returns a boolean value indicating whether the given date
+     * string is valid according to the specified format. It returns `true` if the date is valid and
+     * matches the format, and `false` otherwise.
+     */
+    public static function isAValidDate($date, $format = 'Y-m-d')
+    {
+        $d = DateTime::createFromFormat($format, $date);
+        // The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
+        return $d && $d->format($format) === $date;
+    }
+
+    /**
+     * The function checks if a given string is a valid date.
+     * 
+     * @param myDateString The parameter `` is a string that represents a date and/or time
+     * in a specific format. The function `strtotime()` is used to convert this string into a Unix
+     * timestamp, which is a numeric value representing the number of seconds since January 1, 1970,
+     * 00:00
+     * 
+     * @return A boolean value indicating whether the input string can be converted to a valid date and
+     * time using the `strtotime()` function.
+     */
+    public static function isAValidDateString($myDateString)
+    {
+        return (bool) strtotime($myDateString);
+    }
+
+
+    /**
+     * The function determines the language of a given text by counting the occurrences of the most
+     * frequent words in different languages and returning the language with the highest count, with a
+     * fallback to a default language if no clear winner is found.
+     * 
+     * @param text The input text that needs to be analyzed to determine the language.
+     * @param default The default language to return if no language is detected from the input text.
+     * 
+     * @return the language code of the most likely language of the input text based on the occurrence
+     * of the most frequent words in the text. If no language is detected, it returns the default
+     * language code provided as an argument.
+     */
+    public static function getTextLanguage($text, $default = null)
+    {
+        $supported_languages = array(
+            'en',
+            'de',
+            'fr',
+            'es',
+        );
+        // German word list
+        // from http://wortschatz.uni-leipzig.de/Papers/top100de.txt
+        $wordList['de'] = array(
+            'der',
+            'die',
+            'und',
+            'in',
+            'den',
+            'von',
+            'zu',
+            'das',
+            'mit',
+            'sich',
+            'des',
+            'auf',
+            'für',
+            'ist',
+            'im',
+            'dem',
+            'nicht',
+            'ein',
+            'Die',
+            'eine'
+        );
+        // English word list
+        // from http://en.wikipedia.org/wiki/Most_common_words_in_English
+        $wordList['en'] = array(
+            'the',
+            'be',
+            'to',
+            'of',
+            'and',
+            'a',
+            'in',
+            'that',
+            'have',
+            'I',
+            'it',
+            'for',
+            'not',
+            'on',
+            'with',
+            'he',
+            'as',
+            'you',
+            'do',
+            'at'
+        );
+        // French word list
+        // from https://1000mostcommonwords.com/1000-most-common-french-words/
+        $wordList['fr'] = array(
+            'comme',
+            'que',
+            'tait',
+            'pour',
+            'sur',
+            'sont',
+            'avec',
+            'tre',
+            'un',
+            'ce',
+            'par',
+            'mais',
+            'que',
+            'est',
+            'il',
+            'eu',
+            'la',
+            'et',
+            'dans'
+        );
+
+        // Spanish word list
+        // from https://spanishforyourjob.com/commonwords/
+        $wordList['es'] = array(
+            'que',
+            'no',
+            'a',
+            'la',
+            'el',
+            'es',
+            'y',
+            'en',
+            'lo',
+            'un',
+            'por',
+            'qu',
+            'si',
+            'una',
+            'los',
+            'con',
+            'para',
+            'est',
+            'eso',
+            'las'
+        );
+        // clean out the input string - note we don't have any non-ASCII 
+        // characters in the word lists... change this if it is not the 
+        // case in your language wordlists!
+        $text = preg_replace("/[^A-Za-z]/", ' ', $text);
+        // count the occurrences of the most frequent words
+        foreach ($supported_languages as $language) {
+            $counter[$language] = 0;
+        }
+        for ($i = 0; $i < 20; $i++) {
+            foreach ($supported_languages as $language) {
+                $counter[$language] = $counter[$language] +
+                    // I believe this is way faster than fancy RegEx solutions
+                    substr_count($text, ' ' . $wordList[$language][$i] . ' ');
+                ;
+            }
+        }
+        // get max counter value
+        // from http://stackoverflow.com/a/1461363
+        $max = max($counter);
+        $maxs = array_keys($counter, $max);
+        // if there are two winners - fall back to default!
+        if (count($maxs) == 1) {
+            $winner = $maxs[0];
+            $second = 0;
+            // get runner-up (second place)
+            foreach ($supported_languages as $language) {
+                if ($language <> $winner) {
+                    if ($counter[$language] > $second) {
+                        $second = $counter[$language];
+                    }
+                }
+            }
+            // apply arbitrary threshold of 10%
+            if (($second / $max) < 0.1) {
+                return $winner;
+            }
+        }
+        return $default;
+    }
+
+    /**
+     * The function pads a string with a specified character on the left side until it reaches a
+     * specified length.
+     * 
+     * @param s  is the string that needs to be padded.
+     * @param l The parameter "l" in the function "padl" is an optional parameter that specifies the
+     * desired length of the resulting string. If this parameter is not provided, the default value of
+     * 0 will be used.
+     * @param c The parameter "c" is a string that represents the character to be used for padding. By
+     * default, it is set to a space character.
+     * 
+     * @return the string `` padded with the character `` on the left side until it reaches the
+     * length ``.
+     */
+    public function padl($s, $l = 0, $c = " ")
+    {
+        while (strlen($s) < $l)
+            $s = $c . $s;
+        return $s;
+    }
+
+    /**
+     * The function checks if a given date is valid and returns true if the year is greater than 1800.
+     * 
+     * @param d The parameter "d" is a variable that represents a date. It can be either a string or a
+     * timestamp. The function "validDate" checks if the year of the given date is greater than 1700
+     * and returns a boolean value.
+     * 
+     * @return The function is checking if the input date is valid and returns a boolean value.
+     * Specifically, it checks if the year of the input date is greater than 1700 and returns true if
+     * it is, and false otherwise.
+     */
+    public static function validDate($d)
+    {
+        if (is_string($d))
+            $d = strtotime($d);
+        return date("Y", $d) > 1800;
+    }
+
+    /**
+     * The function retrieves an RSS feed and converts it into HTML format with options to limit the
+     * number of items, show date and description, and cache the results.
+     * 
+     * @param feed_url The URL of the RSS feed to be parsed and displayed as HTML.
+     * @param max_item_cnt The maximum number of items to display from the RSS feed.
+     * @param show_date A boolean value that determines whether to display the date of each feed item.
+     * If set to true, the date will be displayed. If set to false, the date will not be displayed.
+     * @param show_description A boolean value that determines whether to show the description of each
+     * feed item or not. If set to true, the description will be displayed.
+     * @param max_words The maximum number of words to display in the description of each feed item. If
+     * set to 0, the full description will be displayed.
+     * @param cache_timeout The amount of time (in seconds) to cache the RSS feed before checking for
+     * updates. If set to 0, caching is disabled.
+     * @param cache_prefix The prefix to use for the cache file name. It is concatenated with the MD5
+     * hash of the feed URL to create a unique cache file name.
+     * 
+     * @return an HTML string that displays a list of RSS feed items. The number of items displayed,
+     * whether to show the date and description, and the maximum number of words in the description can
+     * be customized using the function parameters. The function also caches the RSS feed content to
+     * improve performance.
+     */
+    public static function get_rss_feed_as_html($feed_url, $max_item_cnt = 10, $show_date = true, $show_description = true, $max_words = 0, $cache_timeout = 7200, $cache_prefix = "/tmp/rss2html-")
+    {
+        $result = "";
+        // get feeds and parse items
+        $rss = new DOMDocument();
+        $cache_file = $cache_prefix . md5($feed_url);
+        // load from file or load content
+        if (
+            $cache_timeout > 0 &&
+            is_file($cache_file) &&
+            (filemtime($cache_file) + $cache_timeout > time())
+        ) {
+            $rss->load($cache_file);
+        } else {
+            $rss->load($feed_url);
+            if ($cache_timeout > 0) {
+                $rss->save($cache_file);
+            }
+        }
+        $feed = array();
+        foreach ($rss->getElementsByTagName('item') as $node) {
+            $item = array(
+                'title' => $node->getElementsByTagName('title')->item(0)->nodeValue,
+                'desc' => $node->getElementsByTagName('description')->item(0)->nodeValue,
+                'content' => $node->getElementsByTagName('description')->item(0)->nodeValue,
+                'link' => $node->getElementsByTagName('link')->item(0)->nodeValue,
+                'date' => $node->getElementsByTagName('pubDate')->item(0)->nodeValue,
+            );
+            $content = $node->getElementsByTagName('encoded'); // <content:encoded>
+            if ($content->length > 0) {
+                $item['content'] = $content->item(0)->nodeValue;
+            }
+            array_push($feed, $item);
+        }
+        // real good count
+        if ($max_item_cnt > count($feed)) {
+            $max_item_cnt = count($feed);
+        }
+        $result .= '<ul class="feed-lists">';
+        for ($x = 0; $x < $max_item_cnt; $x++) {
+            $title = str_replace(' & ', ' &amp; ', $feed[$x]['title']);
+            $link = $feed[$x]['link'];
+            $result .= '<li class="feed-item">';
+            $result .= '<div class="feed-title"><strong><a href="' . $link . '" title="' . $title . '">' . $title . '</a></strong></div>';
+            if ($show_date) {
+                $date = date('l F d, Y', strtotime($feed[$x]['date']));
+                $result .= '<small class="feed-date"><em>Posted on ' . $date . '</em></small>';
+            }
+            if ($show_description) {
+                $description = $feed[$x]['desc'];
+                $content = $feed[$x]['content'];
+                // find the img
+                $has_image = preg_match('/<img.+src=[\'"](?P<src>.+?)[\'"].*>/i', $content, $image);
+                // no html tags
+                $description = strip_tags(preg_replace('/(<(script|style)\b[^>]*>).*?(<\/\2>)/s', "$1$3", $description), '');
+                // whether cut by number of words
+                if ($max_words > 0) {
+                    $arr = explode(' ', $description);
+                    if ($max_words < count($arr)) {
+                        $description = '';
+                        $w_cnt = 0;
+                        foreach ($arr as $w) {
+                            $description .= $w . ' ';
+                            $w_cnt = $w_cnt + 1;
+                            if ($w_cnt == $max_words) {
+                                break;
+                            }
+                        }
+                        $description .= " ...";
+                    }
+                }
+                // add img if it exists
+                if ($has_image == 1) {
+                    $description = '<img class="feed-item-image" src="' . $image['src'] . '" />' . $description;
+                }
+                $result .= '<div class="feed-description">' . $description;
+                $result .= ' <a href="' . $link . '" title="' . $title . '">Continue Reading &raquo;</a>' . '</div>';
+            }
+            $result .= '</li>';
+        }
+        $result .= '</ul>';
+        return $result;
     }
 }
