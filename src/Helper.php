@@ -2026,8 +2026,8 @@ class Helper
     static public function repeat()
     {
         ?>
-                        window.location.reload();
-                <?php
+                                window.location.reload();
+                        <?php
     }
 
 
@@ -3838,7 +3838,7 @@ class Helper
     {
         $result = "";
         // get feeds and parse items
-        $rss = new DOMDocument();
+        $rss = new \DOMDocument();
         $cache_file = $cache_prefix . md5($feed_url);
         // load from file or load content
         if (
@@ -3917,4 +3917,6 @@ class Helper
         $result .= '</ul>';
         return $result;
     }
+
+
 }
