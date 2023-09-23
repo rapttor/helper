@@ -1899,8 +1899,8 @@ class Helper
     static public function repeat()
     {
         ?>
-                                                window.location.reload();
-                                        <?php
+                                                        window.location.reload();
+                                                <?php
     }
 
 
@@ -3991,14 +3991,17 @@ class Helper
         self::send(array("status" => "ERROR", "message" => $msg));
     }
 
+
     /**
-     * Converts a CSV string or array into a multidimensional array.
+     * Converts a comma-separated value (CSV) string or array into an associative array.
      *
-     * @param mixed $string The CSV string or array to convert.
-     * @param bool $map1strow Whether to map the first row as keys for each row.
-     * @return array The multidimensional array representation of the CSV.
+     * @param mixed $string The CSV string or array to be converted.
+     * @param bool $map1strow Whether to use the first row as keys for the associative array. Default is false.
+     * @param array|false $replacements An optional array of key replacements for normalization. Default is false.
+     * @param bool $normalize Whether to normalize the keys by replacing spaces with underscores. Default is false.
+     * @return array The CSV data converted into an associative array.
      */
-    function csv2arr($string, $map1strow = false)
+    public static function csv2arr($string, $map1strow = false, $replacements = false, $normalize = false)
     {
         if (is_array($string))
             $lines = $string;
@@ -4008,14 +4011,22 @@ class Helper
         $csv = array_map('str_getcsv', $lines);
         if ($map1strow) {
             $keys = array_values($csv[0]);
+
             foreach ($csv as $key => $row) { // all lines
                 $temp = array();
                 foreach ($row as $k => $v) { // row columns
-                    $tempkey = $keys[$k];
+                    $tempkey = strtolower($keys[$k]);
+                    if ($replacements) {
+                        $tempkey = strtolower($keys[$k]);
+                        if (isset($replacements[$tempkey]))
+                            $tempkey = $replacements[$tempkey];
+                        if ($normalize)
+                            $tempkey = str_ireplace(array(" "), "_", $tempkey);
+                    }
                     $temp[$tempkey] = $v;
                     if (substr($tempkey, strlen($tempkey) - 1, 1) == "s" && stripos($v, ",") !== false) {
                         $v = str_ireplace(', ', ',', $v);
-                        $temp[$tempkey . " Map"] = explode(',', $v);
+                        $temp[$tempkey . " map"] = explode(',', $v);
                     }
                 }
                 $csv[$key] = $temp;
