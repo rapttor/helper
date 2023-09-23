@@ -1899,8 +1899,8 @@ class Helper
     static public function repeat()
     {
         ?>
-                                        window.location.reload();
-                                <?php
+                                                window.location.reload();
+                                        <?php
     }
 
 
@@ -3955,13 +3955,13 @@ class Helper
      * @return [type]
      * 
      */
-    public static function json_value($arr, $key, $def=false)
+    public static function json_value($arr, $key, $def = false)
     {
         $value = $def;
         if (is_string($arr))
             $arr = json_decode($arr, true);
         if (is_array($arr) && isset($arr[$key]))
-            $value=$arr[$key];
+            $value = $arr[$key];
         return $value;
     }
 
@@ -3989,6 +3989,40 @@ class Helper
     public static function sendError($msg)
     {
         self::send(array("status" => "ERROR", "message" => $msg));
+    }
+
+    /**
+     * Converts a CSV string or array into a multidimensional array.
+     *
+     * @param mixed $string The CSV string or array to convert.
+     * @param bool $map1strow Whether to map the first row as keys for each row.
+     * @return array The multidimensional array representation of the CSV.
+     */
+    function csv2arr($string, $map1strow = false)
+    {
+        if (is_array($string))
+            $lines = $string;
+        if (is_string($string))
+            $lines = explode("\n", $string);
+
+        $csv = array_map('str_getcsv', $lines);
+        if ($map1strow) {
+            $keys = array_values($csv[0]);
+            foreach ($csv as $key => $row) { // all lines
+                $temp = array();
+                foreach ($row as $k => $v) { // row columns
+                    $tempkey = $keys[$k];
+                    $temp[$tempkey] = $v;
+                    if (substr($tempkey, strlen($tempkey) - 1, 1) == "s" && stripos($v, ",") !== false) {
+                        $v = str_ireplace(', ', ',', $v);
+                        $temp[$tempkey . " Map"] = explode(',', $v);
+                    }
+                }
+                $csv[$key] = $temp;
+            }
+            array_shift($csv);
+        }
+        return $csv;
     }
 
 

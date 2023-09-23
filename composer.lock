@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d028e47a2c996112b75ddd1dda6a90a2",
+    "content-hash": "ed0a3ff4735f56ec9d4b263d0c0b9781",
     "packages": [
         {
             "name": "ressio/pharse",
@@ -66,5 +66,5 @@
         "php": ">=4.5.0"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.3.0"
 }
