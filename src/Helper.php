@@ -56,13 +56,13 @@ class Helper
      * @param mixed $date
      * @return [int] // date
      */
-    public static function toDate($date)
+    public static function toDate($dateStr, $format = "Y-m-d")
     {
-        if (!is_numeric($date) && is_string($date))
-            $date = strtotime($date);
-        if (is_numeric($date))
-            $date = date("Y-m-d", $date);
-        return $date;
+        date_default_timezone_set('UTC');
+        $date = DateTime::createFromFormat($format, $dateStr);
+        if ($date && ($date->format($format) === $dateStr))
+            return $date->format($format);
+        return false;
     }
 
     /**
@@ -967,133 +967,6 @@ class Helper
     {
         return "<div class='clearfix'></div><a style='clear:both;margin:10px 0;' class='btn btn-primary' onclick='history.go(-1);'><i class='fa fa-caret-left'></i> " .
             $title . "</a><div class='clearfix'></div>";
-    }
-
-    /**
-     * @param mixed $string
-     * 
-     * @return [type]
-     */
-    public static function is_json($string)
-    {
-        return ((is_string($string) &&
-            (is_object(json_decode($string)) ||
-                is_array(json_decode($string, true))))) ? true : false;
-    }
-
-    /**
-     * @param mixed $string
-     * 
-     * @return [type]
-     */
-    public static function json_validate($string)
-    {
-        // decode the JSON data
-        $result = json_decode($string);
-
-        // switch and check possible JSON errors
-        switch (json_last_error()) {
-            case JSON_ERROR_NONE:
-                $error = ''; // JSON is valid // No error has occurred
-                break;
-            case JSON_ERROR_DEPTH:
-                $error = 'The maximum stack depth has been exceeded.';
-                break;
-            case JSON_ERROR_STATE_MISMATCH:
-                $error = 'Invalid or malformed JSON.';
-                break;
-            case JSON_ERROR_CTRL_CHAR:
-                $error = 'Control character error, possibly incorrectly encoded.';
-                break;
-            case JSON_ERROR_SYNTAX:
-                $error = 'Syntax error, malformed JSON.';
-                break;
-            // PHP >= 5.3.3
-            case JSON_ERROR_UTF8:
-                $error = 'Malformed UTF-8 characters, possibly incorrectly encoded.';
-                break;
-            // PHP >= 5.5.0
-            case JSON_ERROR_RECURSION:
-                $error = 'One or more recursive references in the value to be encoded.';
-                break;
-            // PHP >= 5.5.0
-            case JSON_ERROR_INF_OR_NAN:
-                $error = 'One or more NAN or INF values in the value to be encoded.';
-                break;
-            case JSON_ERROR_UNSUPPORTED_TYPE:
-                $error = 'A value of a type that cannot be encoded was given.';
-                break;
-            default:
-                $error = 'Unknown JSON error occured.';
-                break;
-        }
-
-        if ($error !== '') {
-            // throw the Exception or exit // or whatever :)
-            exit($error);
-        }
-
-        // everything is OK
-        return $result;
-    }
-
-    /**
-     * @param mixed $arr
-     * @param mixed $key
-     * @param mixed $def
-     * 
-     * @return [type]
-     */
-    public static function jsonValue($arr, $key, $def)
-    {
-        $value = $def;
-        if (isset($arr[$key]) && strlen(trim(strip_tags($arr[$key]))) > 2)
-            $value = json_decode($arr[$key]);
-        return $value;
-    }
-
-    /**
-     * @return [type]
-     */
-    public static function jsonError()
-    {
-        $error = null;
-        switch (json_last_error()) {
-            case JSON_ERROR_NONE:
-                $error = ''; // JSON is valid // No error has occurred
-                break;
-            case JSON_ERROR_DEPTH:
-                $error = 'The maximum stack depth has been exceeded.';
-                break;
-            case JSON_ERROR_STATE_MISMATCH:
-                $error = 'Invalid or malformed JSON.';
-                break;
-            case JSON_ERROR_CTRL_CHAR:
-                $error = 'Control character error, possibly incorrectly encoded.';
-                break;
-            case JSON_ERROR_SYNTAX:
-                $error = 'Syntax error, malformed JSON.';
-                break;
-            // PHP >= 5.3.3
-            case JSON_ERROR_UTF8:
-                $error = 'Malformed UTF-8 characters, possibly incorrectly encoded.';
-                break;
-            // PHP >= 5.5.0
-            case JSON_ERROR_RECURSION:
-                $error = 'One or more recursive references in the value to be encoded.';
-                break;
-            // PHP >= 5.5.0
-            case JSON_ERROR_INF_OR_NAN:
-                $error = 'One or more NAN or INF values in the value to be encoded.';
-                break;
-            case JSON_ERROR_UNSUPPORTED_TYPE:
-                $error = 'A value of a type that cannot be encoded was given.';
-                break;
-            default:
-                $error = 'Unknown JSON error occured.';
-                break;
-        }
-        return $error;
     }
 
     /**
@@ -2026,8 +1899,8 @@ class Helper
     static public function repeat()
     {
         ?>
-                                window.location.reload();
-                        <?php
+                                        window.location.reload();
+                                <?php
     }
 
 
@@ -3917,6 +3790,207 @@ class Helper
         $result .= '</ul>';
         return $result;
     }
+
+
+
+
+    /**
+     * @param mixed $string
+     * 
+     * @return [type]
+     */
+    public static function is_json($string)
+    {
+        return ((is_string($string) &&
+            (is_object(json_decode($string)) ||
+                is_array(json_decode($string, true))))) ? true : false;
+    }
+
+    /**
+     * @param mixed $string
+     * 
+     * @return [type]
+     */
+    public static function json_validate($string)
+    {
+        // decode the JSON data
+        $result = json_decode($string);
+
+        // switch and check possible JSON errors
+        switch (json_last_error()) {
+            case JSON_ERROR_NONE:
+                $error = ''; // JSON is valid // No error has occurred
+                break;
+            case JSON_ERROR_DEPTH:
+                $error = 'The maximum stack depth has been exceeded.';
+                break;
+            case JSON_ERROR_STATE_MISMATCH:
+                $error = 'Invalid or malformed JSON.';
+                break;
+            case JSON_ERROR_CTRL_CHAR:
+                $error = 'Control character error, possibly incorrectly encoded.';
+                break;
+            case JSON_ERROR_SYNTAX:
+                $error = 'Syntax error, malformed JSON.';
+                break;
+            // PHP >= 5.3.3
+            case JSON_ERROR_UTF8:
+                $error = 'Malformed UTF-8 characters, possibly incorrectly encoded.';
+                break;
+            // PHP >= 5.5.0
+            case JSON_ERROR_RECURSION:
+                $error = 'One or more recursive references in the value to be encoded.';
+                break;
+            // PHP >= 5.5.0
+            case JSON_ERROR_INF_OR_NAN:
+                $error = 'One or more NAN or INF values in the value to be encoded.';
+                break;
+            case JSON_ERROR_UNSUPPORTED_TYPE:
+                $error = 'A value of a type that cannot be encoded was given.';
+                break;
+            default:
+                $error = 'Unknown JSON error occured.';
+                break;
+        }
+
+        if ($error !== '') {
+            // throw the Exception or exit // or whatever :)
+            exit($error);
+        }
+
+        // everything is OK
+        return $result;
+    }
+
+    /**
+     * @param mixed $arr
+     * @param mixed $key
+     * @param mixed $def
+     * 
+     * @return [type]
+     */
+    public static function jsonValue($arr, $key, $def) // support old calls;
+    {
+        return self::json_value($arr, $key, $def);
+    }
+
+    /**
+     * @return [type]
+     */
+    public static function json_error()
+    {
+        $error = null;
+        switch (json_last_error()) {
+            case JSON_ERROR_NONE:
+                $error = ''; // JSON is valid // No error has occurred
+                break;
+            case JSON_ERROR_DEPTH:
+                $error = 'The maximum stack depth has been exceeded.';
+                break;
+            case JSON_ERROR_STATE_MISMATCH:
+                $error = 'Invalid or malformed JSON.';
+                break;
+            case JSON_ERROR_CTRL_CHAR:
+                $error = 'Control character error, possibly incorrectly encoded.';
+                break;
+            case JSON_ERROR_SYNTAX:
+                $error = 'Syntax error, malformed JSON.';
+                break;
+            // PHP >= 5.3.3
+            case JSON_ERROR_UTF8:
+                $error = 'Malformed UTF-8 characters, possibly incorrectly encoded.';
+                break;
+            // PHP >= 5.5.0
+            case JSON_ERROR_RECURSION:
+                $error = 'One or more recursive references in the value to be encoded.';
+                break;
+            // PHP >= 5.5.0
+            case JSON_ERROR_INF_OR_NAN:
+                $error = 'One or more NAN or INF values in the value to be encoded.';
+                break;
+            case JSON_ERROR_UNSUPPORTED_TYPE:
+                $error = 'A value of a type that cannot be encoded was given.';
+                break;
+            default:
+                $error = 'Unknown JSON error occured.';
+                break;
+        }
+        return $error;
+    }
+
+
+    /**
+     * [Description for json_array]
+     *
+     * @param mixed $data
+     * 
+     * @return [type]
+     * 
+     */
+    public static function json_array($data)
+    {
+        if (is_array($data))
+            foreach ($data as $k => $v) {
+                if (is_numeric($k)) {
+                    if (is_array($v)) {
+                        if (!isset($v["id"]))
+                            $data[$k][$k] = $k;
+                    } else if (is_scalar($v)) {
+                        $data[$k] = array(
+                            "id" => $k,
+                            "name" => $v,
+                        );
+                    }
+                }
+            }
+        return json_encode(array_values($data));
+    }
+
+    /**
+     * [Description for json_value]
+     *
+     * @param mixed $s
+     * @param mixed $key
+     * 
+     * @return [type]
+     * 
+     */
+    public static function json_value($arr, $key, $def=false)
+    {
+        $value = $def;
+        if (is_string($arr))
+            $arr = json_decode($arr, true);
+        if (is_array($arr) && isset($arr[$key]))
+            $value=$arr[$key];
+        return $value;
+    }
+
+    /**
+     * [Description for sendOk]
+     *
+     * @param mixed $data
+     * 
+     * @return [type]
+     * 
+     */
+    public static function sendOk($data)
+    {
+        self::send(array("status" => "OK", "data" => $data));
+    }
+
+    /**
+     * [Description for sendError]
+     *
+     * @param mixed $msg
+     * 
+     * @return [type]
+     * 
+     */
+    public static function sendError($msg)
+    {
+        self::send(array("status" => "ERROR", "message" => $msg));
+    }
+
 
 
 }
