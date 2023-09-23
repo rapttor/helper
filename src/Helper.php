@@ -4011,17 +4011,15 @@ class Helper
         $csv = array_map('str_getcsv', $lines);
         if ($map1strow) {
             $keys = array_values($csv[0]);
-
             foreach ($csv as $key => $row) { // all lines
                 $temp = array();
                 foreach ($row as $k => $v) { // row columns
-                    $tempkey = strtolower($keys[$k]);
                     if ($replacements) {
-                        $tempkey = strtolower($keys[$k]);
+                        $tempkey = $keys[$k];
                         if (isset($replacements[$tempkey]))
                             $tempkey = $replacements[$tempkey];
                         if ($normalize)
-                            $tempkey = str_ireplace(array(" "), "_", $tempkey);
+                            $tempkey = strtolower(str_ireplace(array(" "), "_", $tempkey));
                     }
                     $temp[$tempkey] = $v;
                     if (substr($tempkey, strlen($tempkey) - 1, 1) == "s" && stripos($v, ",") !== false) {
