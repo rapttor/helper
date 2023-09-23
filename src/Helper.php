@@ -1899,8 +1899,8 @@ class Helper
     static public function repeat()
     {
         ?>
-                                                        window.location.reload();
-                                                <?php
+                                                                window.location.reload();
+                                                        <?php
     }
 
 
@@ -4026,7 +4026,7 @@ class Helper
                     $temp[$tempkey] = $v;
                     if (substr($tempkey, strlen($tempkey) - 1, 1) == "s" && stripos($v, ",") !== false) {
                         $v = str_ireplace(', ', ',', $v);
-                        $temp[$tempkey . " map"] = explode(',', $v);
+                        $temp[$tempkey . "_map"] = explode(',', $v);
                     }
                 }
                 $csv[$key] = $temp;
