@@ -4035,7 +4035,7 @@ class Helper
                             $tempkey = strtolower(str_ireplace(array(" "), "_", $tempkey));
                     }
                     $temp[$tempkey] = $v;
-                    if (substr($tempkey, strlen($tempkey) - 1, 1) == "s" && stripos($v, ",") !== false) {
+                    if (is_string($tempkey) && substr($tempkey, strlen($tempkey) - 1, 1) == "s" && stripos($v, ",") !== false) {
                         $v = str_ireplace(', ', ',', $v);
                         $temp[$tempkey . "_map"] = explode(',', $v);
                     }
