@@ -1085,31 +1085,76 @@ class Helper
         return self::replaceAll('__', '_', preg_replace('/[^\w]/', '_', $str));
     }
 
-    /**
-     * @return [type]
-     */
-    public static function cors()
-    {
 
-        // Allow from any origin
-        if (isset($_SERVER['HTTP_ORIGIN'])) {
-            // Decide if the origin in $_SERVER['HTTP_ORIGIN'] is one
-            // you want to allow, and if so:
-            header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-            header('Access-Control-Allow-Credentials: true');
-            header('Access-Control-Max-Age: 86400'); // cache for 1 day
+
+    /**
+     * Retrieves the origin URL for the request.
+     *
+     * @return string The origin URL.
+     */
+    public static function origin()
+    {
+        $origin = "*";
+        $keys = array("REMOTE_ADDR", "HTTP_REFERER", "HTTP_ORIGIN");
+        foreach ($keys as $key)
+            if (isset($_SERVER[$key])) {
+                // overwrite previoud
+                $origin = $_SERVER[$key];
+            }
+        return $origin;
+    }
+
+
+    /**
+     * Generates the function comment for the given function body.
+     *
+     * @param bool $asstring Determines if the output should be returned as a string or an array. Default is false.
+     * @return array|string The generated function comment.
+     */
+    public static function methods($asstring = false)
+    {
+        $methods = explode(',', 'GET,PUT,POST,DELETE,PATCH,HEAD,OPTIONS');
+        foreach ($methods as $m) {
+            $m = trim($m);
+            // not case sensitive, but who known what next  will be added as a rule
+            $keys = array(ucfirst(strtolower($m)), strtolower($m), strtoupper($m));
+            
+            foreach ($keys as $key)
+                if (!in_array($key, $methods, true))
+                    $methods[] = $key;
+            $methods = array_unique(array_values($methods));
         }
+        if ($asstring)
+            $methods = implode(', ', $methods);
+        return $methods;
+    }
+    /**
+     * Sets the necessary headers for Cross-Origin Resource Sharing (CORS).
+     *
+     * @param boolean $removeheaders Flag indicating whether to remove existing headers. Default is `false`.
+     * @return void
+     */
+    public static function cors($removeheaders = false)
+    {
+        if ($removeheaders)
+            header_remove();
+        $origin = self::origin();
+        if ($origin) { // as previous version was returning false also
+            header("Access-Control-Allow-Origin: " . $origin);
+        } else {
+            header("Access-Control-Allow-Origin: *");
+        }
+        header("Access-Control-Allow-Headers: *");
+        $methods = self::methods(true);
+        header('Access-Control-Allow-Methods: ' . $methods);
+        header('Access-Control-Allow-Credentials: true');
 
         // Access-Control headers are received during OPTIONS requests
         if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-
             if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
                 // may also be using PUT, PATCH, HEAD etc
-                header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-
-            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-                header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
-
+                if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+                    header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
             exit(0);
         }
     }
@@ -1215,6 +1260,12 @@ class Helper
     }
 
 
+    /**
+     * Determines the credit card type based on the provided card number.
+     *
+     * @param string $cardNumber The credit card number to check.
+     * @return string|bool The credit card type if valid, false otherwise.
+     */
     static public function getCCType($cardNumber)
     {
         // Remove non-digits from the number
@@ -1246,6 +1297,12 @@ class Helper
         }
     }
 
+    /**
+     * Validates the checksum of a credit card number.
+     *
+     * @param string $number The credit card number to be validated.
+     * @return bool Returns `TRUE` if the checksum is valid, `FALSE` otherwise.
+     */
     function validateCCChecksum($number)
     {
 
@@ -1899,8 +1956,8 @@ class Helper
     static public function repeat()
     {
         ?>
-                                                                                                                window.location.reload();
-                                                                                                        <?php
+                                                                                                                                                                                                                                        window.location.reload();
+                                                                                                                                                                                                                                <?php
     }
 
 
@@ -3153,18 +3210,18 @@ class Helper
      * @param convert Convert object to arrays
      * @return An array of objects with the key being the id of the object.
      */
-    public static function reIndex($a, $key = "id", $all = false, $convert=true)
+    public static function reIndex($a, $key = "id", $all = false, $convert = true)
     {
         if (is_array($a)) {
             $temp = array();
             foreach ($a as $o)
                 if (is_object($o) && property_exists($o, $key)) {
-                    $temp[$o->$key] = (array)$o;
+                    $temp[$o->$key] = (array) $o;
                 } else if (is_array($o) && isset($o[$key])) {
                     $temp[$o[$key]] = $o;
                 } else {
                     if ($all)
-                        $temp[] = (is_object($o)?(array)$o:$o);
+                        $temp[] = (is_object($o) ? (array) $o : $o);
                 }
             return $temp;
         }
@@ -4000,7 +4057,6 @@ class Helper
         self::send(array("status" => "ERROR", "message" => $msg));
     }
 
-
     /**
      * Converts a comma-separated value (CSV) string or array into an associative array.
      *
@@ -4048,5 +4104,36 @@ class Helper
     }
 
 
+    /**
+     * Converts an object or array to a multidimensional array.
+     *
+     * @param mixed $data The object or array to be converted.
+     * @return array The converted multidimensional array.
+     */
+    public static function object_to_array($data)
+    {
+        $result = [];
+        foreach ($data as $key => $value) {
+            $result[$key] = (is_array($value) || is_object($value)) ? self::object_to_array($value) : $value;
+        }
+        return $result;
+    }
+
+    /**
+     * Extracts values from an array based on the given keys.
+     *
+     * @param mixed $data The array to extract values from.
+     * @param array $keys The keys to extract values for.
+     * @throws Some_Exception_Class description of exception
+     * @return mixed The extracted values.
+     */
+    public static function extract_from_array($data, $keys)
+    {
+        $result = [];
+        foreach ($keys as $key) {
+            $result[$key] = $data[$key];
+        }
+        return $result;
+    }
 
 }

@@ -116,5 +116,16 @@ class HelperTest extends TestCase
     unset($var);
   }
 
+  public function testDump()
+  {
+    $var = new RapTToR\Helper;
+    $temp = array(
+      "methods" => $var->methods(true),
+    );
+    var_dump($temp);
+    $this->assertTrue(is_array($temp) && isset($temp["methods"]) && is_string($temp["methods"]));
+    return true;
+  }
+
 
 }
