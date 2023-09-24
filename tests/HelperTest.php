@@ -33,10 +33,24 @@ class HelperTest extends TestCase
    * any typo before you even use this library in a real project.
    *
    */
-  public function testMethod1()
+  /* public function testMethod1()
   {
     $var = new RapTToR\Helper;
-    // test:: $this->assertTrue($var->method1("hey") == 'Hello World');
+    $this->assertTrue($var->method1("hey") == 'Hello World');
+    unset($var);
+  } */
+
+  public function testCsv2arrFile()
+  {
+    $var = new RapTToR\Helper;
+    $this->assertTrue(is_array($var->csv2arr("countries.csv")));
+    unset($var);
+  }
+  public function testCsv2arrString()
+  {
+    $var = new RapTToR\Helper;
+    $countries = file(__DIR__ . "/countries.csv");
+    $this->assertTrue(is_array($var->csv2arr($countries)));
     unset($var);
   }
 }

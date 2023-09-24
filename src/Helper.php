@@ -1899,8 +1899,8 @@ class Helper
     static public function repeat()
     {
         ?>
-                                                                window.location.reload();
-                                                        <?php
+                                                                                window.location.reload();
+                                                                        <?php
     }
 
 
@@ -4005,8 +4005,12 @@ class Helper
     {
         if (is_array($string))
             $lines = $string;
-        if (is_string($string))
-            $lines = explode("\n", $string);
+        if (is_string($string)) {
+            if (stripos($string, ".csv") !== false && is_file($string))
+                $lines = file($string);
+            else
+                $lines = explode("\n", $string);
+        }
 
         $csv = array_map('str_getcsv', $lines);
         if ($map1strow) {
