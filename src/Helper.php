@@ -4027,8 +4027,8 @@ class Helper
             foreach ($csv as $key => $row) { // all lines
                 $temp = array();
                 foreach ($row as $k => $v) { // row columns
+                    $tempkey = $keys[$k];
                     if ($replacements) {
-                        $tempkey = $keys[$k];
                         if (isset($replacements[$tempkey]))
                             $tempkey = $replacements[$tempkey];
                         if ($normalize)
