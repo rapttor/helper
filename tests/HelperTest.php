@@ -53,4 +53,68 @@ class HelperTest extends TestCase
     $this->assertTrue(is_array($var->csv2arr($countries)));
     unset($var);
   }
+
+
+  private function demoArray()
+  {
+    $obj = new stdClass();
+    $obj->id = "o1";
+    $obj->name = "o";
+    $arr = array(
+      array("id" => "a1", "name" => "a"),
+      array("id" => 22, "name" => "b"),
+      array("x" => 22, "name" => "b"),
+      array("x" => "s1", "name" => "b"),
+      array("name" => "c"),
+      $obj
+    );
+    return $arr;
+  }
+  public function testReIndex1()
+  {
+    $arr = self::demoArray();
+    $var = new RapTToR\Helper;
+    $indexed = $var->reIndex($arr, "id");
+    $this->assertTrue(
+      is_array($indexed) &&
+      isset($indexed["a1"]) &&
+      is_array($indexed["a1"]) &&
+      isset($indexed["a1"]["name"]) &&
+      $indexed["a1"]["name"] == "a"
+    );
+    unset($var);
+  }
+  public function testReIndex2()
+  {
+    $arr = self::demoArray();
+    $var = new RapTToR\Helper;
+    $indexxed = $var->reIndex($arr, "x");
+    $this->assertTrue(
+      is_array($indexxed) &&
+      isset($indexxed["s1"]) &&
+      is_array($indexxed["s1"]) &&
+      isset($indexxed["s1"]["name"]) &&
+      $indexxed["s1"]["name"] == "b"
+    );
+
+    unset($var);
+  }
+
+  public function testReIndex3()
+  {
+    $arr = self::demoArray();
+    $var = new RapTToR\Helper;
+    $indexxed = $var->reIndex($arr, "id");
+    $this->assertTrue(
+      is_array($indexxed) &&
+      isset($indexxed["o1"]) &&
+      is_array($indexxed["o1"]) &&
+      isset($indexxed["o1"]["name"]) &&
+      $indexxed["o1"]["name"] == "o"
+    );
+
+    unset($var);
+  }
+
+
 }

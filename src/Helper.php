@@ -1899,8 +1899,8 @@ class Helper
     static public function repeat()
     {
         ?>
-                                                                                window.location.reload();
-                                                                        <?php
+                                                                                                                window.location.reload();
+                                                                                                        <?php
     }
 
 
@@ -3148,15 +3148,24 @@ class Helper
      * objects
      * 
      * @param a The array to re-index
-     * 
+     * @param key The key to re-index
+     * @param all Use values without keys
+     * @param convert Convert object to arrays
      * @return An array of objects with the key being the id of the object.
      */
-    public static function reIndex($a)
+    public static function reIndex($a, $key = "id", $all = false, $convert=true)
     {
         if (is_array($a)) {
             $temp = array();
             foreach ($a as $o)
-                $temp[$o->id] = $o;
+                if (is_object($o) && property_exists($o, $key)) {
+                    $temp[$o->$key] = (array)$o;
+                } else if (is_array($o) && isset($o[$key])) {
+                    $temp[$o[$key]] = $o;
+                } else {
+                    if ($all)
+                        $temp[] = (is_object($o)?(array)$o:$o);
+                }
             return $temp;
         }
         return $a;
