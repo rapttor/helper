@@ -1118,7 +1118,7 @@ class Helper
             $m = trim($m);
             // not case sensitive, but who known what next  will be added as a rule
             $keys = array(ucfirst(strtolower($m)), strtolower($m), strtoupper($m));
-            
+
             foreach ($keys as $key)
                 if (!in_array($key, $methods, true))
                     $methods[] = $key;
@@ -1956,8 +1956,8 @@ class Helper
     static public function repeat()
     {
         ?>
-                                                                                                                                                                                                                                        window.location.reload();
-                                                                                                                                                                                                                                <?php
+                                                                                                                                                                                                                                                                window.location.reload();
+                                                                                                                                                                                                                                                        <?php
     }
 
 
@@ -3226,6 +3226,22 @@ class Helper
             return $temp;
         }
         return $a;
+    }
+
+    public static function unsetAll($arr, $keys, $deep = true)
+    {
+        if (isset($arr) && is_array($arr)) {
+            foreach ($keys as $u)
+                if (isset($arr[$u]))
+                    unset($arr[$u]); foreach ($arr as $k => $v) {
+                if (is_array($v))
+                    foreach ($keys as $u)
+                        if (isset($v[$u]))
+                            unset($v[$u]);
+                $arr[$k] = $v;
+            }
+        }
+        return $arr;
     }
 
 
