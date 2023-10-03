@@ -1956,8 +1956,8 @@ class Helper
     static public function repeat()
     {
         ?>
-                                                                                                                                                                                                                                                                window.location.reload();
-                                                                                                                                                                                                                                                        <?php
+                                                                                                                                                                                                                                                                        window.location.reload();
+                                                                                                                                                                                                                                                                <?php
     }
 
 
@@ -4151,5 +4151,73 @@ class Helper
         }
         return $result;
     }
+
+    /**
+     * Moves the specified key to the front of the array.
+     *
+     * @param array $arr The input array.
+     * @param mixed $key The key to move to the front.
+     * @return array The modified array with the key moved to the front.
+     */
+    public static function moveForward($arr, $key)
+    {
+        if (isset($arr[$key]))
+            $arr = array_merge([$key => $arr[$key]], $arr);
+        return $arr;
+    }
+
+
+    /**
+     * Markup JSON string with HTML span tags for color styling.
+     *
+     * @param string $in The input JSON string to be marked up.
+     * @return string The marked up JSON string.
+     */
+    public static function markupJson(string $in): string
+    {
+        $string = 'green';
+        $number = 'darkorange';
+        $null = 'magenta';
+        $key = 'red';
+        $pattern = '/("(\\\\u[a-zA-Z0-9]{4}|\\\\[^u]|[^\\\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/';
+        return preg_replace_callback(
+            $pattern,
+            function (array $matches) use ($string, $number, $null, $key): string {
+                $match = $matches[0];
+                $colour = $number;
+                if (preg_match('/^"/', $match)) {
+                    $colour = preg_match('/:$/', $match)
+                        ? $key
+                        : $string;
+                } elseif ($match === 'null') {
+                    $colour = $null;
+                }
+                return "<span style='color:{$colour}'>{$match}</span>";
+            },
+            str_replace(['<', '>', '&'], ['&lt;', '&gt;', '&amp;'], $in)
+        ) ?? $in;
+    }
+
+    /**
+     * Shuffles the key-value pairs of an associative array.
+     *
+     * @param array $list The associative array to be shuffled.
+     * @return array The shuffled associative array.
+     */
+    public static function shuffle_assoc($list)
+    {
+        if (!is_array($list))
+            return $list;
+
+        $keys = array_keys($list);
+        shuffle($keys);
+        $random = array();
+        foreach ($keys as $key) {
+            $random[$key] = $list[$key];
+        }
+        return $random;
+    }
+
+    
 
 }
