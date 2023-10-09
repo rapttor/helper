@@ -1,4 +1,6 @@
 <?php // ﷽
+// declare(strict_types = 1);
+
 namespace RapTToR;
 
 use GdImage;
@@ -18,7 +20,6 @@ $RapTToR_LANGUAGES = array();
  */
 class Helper
 {
-
 
     /**
      * `dump()` is a function that takes a variable as an argument and outputs it in a textarea
@@ -4218,6 +4219,6 @@ class Helper
         return $random;
     }
 
-    
+
 
 }
