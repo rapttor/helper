@@ -4219,6 +4219,36 @@ class Helper
         return $random;
     }
 
+    /**
+     * Generates an array of parameters based on the given defaults and options.
+     *
+     * @param array $defaults An associative array of default parameter values.
+     * @param array|null $options An associative array of optional parameters.
+     *                           If null, the $_REQUEST array will be used.
+     * @return array An array of parameters with values based on the defaults
+     *               and options.
+     */
+    public static function parameters($defaults, $options = null)
+    {
+        $result = array();
+        if (is_null($options))
+            $options = $_REQUEST;
+        foreach ($defaults as $k => $v) {
+            if (isset($options[$k])) {
+                $value = $options[$k];
+                if (is_numeric($v))
+                    $value = (float) $options[$k];
+                if (is_integer($v))
+                    $value = (int) $options[$k];
+                if (is_bool($v))
+                    $value = (bool) $options[$k];
+                $result[$k] = $value;
+            } else
+                $result[$k] = $v;
+        }
+        return $result;
+    }
+
 
 
 }
