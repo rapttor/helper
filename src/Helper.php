@@ -1957,8 +1957,8 @@ class Helper
     static public function repeat()
     {
         ?>
-                                                                                                                                                                                                                                                                        window.location.reload();
-                                                                                                                                                                                                                                                                <?php
+                                                                                                                                                                                                                                                                                window.location.reload();
+                                                                                                                                                                                                                                                                        <?php
     }
 
 
@@ -3216,7 +3216,7 @@ class Helper
         if (is_array($a)) {
             $temp = array();
             foreach ($a as $o)
-                if (is_object($o) && property_exists($o, $key)) {
+                if (is_object($o) && isset($o->$key)) {
                     $temp[$o->$key] = (array) $o;
                 } else if (is_array($o) && isset($o[$key])) {
                     $temp[$o[$key]] = $o;
