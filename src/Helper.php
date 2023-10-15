@@ -4220,15 +4220,21 @@ class Helper
     }
 
     /**
-     * Generates an array of parameters based on the given defaults and options.
+     * A function that takes an array of default values and an optional array of options,
+     * and returns an array that merges the default values with the options.
+     * use as: 
+            extract($options = \RapTToR\Helper::parameters(
+                array(
+                    "param1" => $param1 = $value1,
+                ), [$options], [false]
+            ), EXTR_OVERWRITE);
      *
-     * @param array $defaults An associative array of default parameter values.
-     * @param array|null $options An associative array of optional parameters.
-     *                           If null, the $_REQUEST array will be used.
-     * @return array An array of parameters with values based on the defaults
-     *               and options.
+     * @param array $defaults An array of default values.
+     * @param array|null $options An optional array of options. If not provided, it uses $_REQUEST.
+     * @param bool $convert Whether to convert the values to their specified data types.
+     * @return array The merged array of default values and options.
      */
-    public static function parameters($defaults, $options = null)
+    public static function parameters($defaults, $options = null, $convert=true)
     {
         $result = array();
         if (is_null($options))
@@ -4236,12 +4242,19 @@ class Helper
         foreach ($defaults as $k => $v) {
             if (isset($options[$k])) {
                 $value = $options[$k];
-                if (is_numeric($v))
-                    $value = (float) $options[$k];
-                if (is_integer($v))
-                    $value = (int) $options[$k];
-                if (is_bool($v))
-                    $value = (bool) $options[$k];
+                if ($convert) { 
+                    if (is_object($v)) {
+                        // nothing.
+                    } else if (is_array($v)) {
+                        // nothing.
+                    } else if (is_numeric($v)) {
+                        $value = (float) $options[$k];
+                    } else if (is_integer($v)) {
+                        $value = (int) $options[$k];
+                    } else if (is_bool($v)) {
+                        $value = (bool) $options[$k];
+                    }
+                }
                 $result[$k] = $value;
             } else
                 $result[$k] = $v;
