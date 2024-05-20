@@ -1344,6 +1344,10 @@ class Helper
      * @param null $sendthis null - pass $this inside object methods, accessible in template
      * @return bool|string
      */
+    public static function render($strViewFile, $arVariables = [], $return = false, $sendthis = null)
+    {
+        return self::template($strViewFile, $arVariables, $return, $sendthis);
+    }
     public static function template($strViewFile, $arVariables = [], $return = false, $sendthis = null)
     {
         $strTemplate = $strViewFile . ".php";
