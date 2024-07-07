@@ -1,6 +1,7 @@
 {
   "name": "rapttor/helper",
   "description": "General helper class",
+  "version": "1.0.0", 
   "keywords": [
     "php",
     "helper"
