@@ -112,8 +112,8 @@ class Helper
             }
         } else
             if (is_string($a)) {
-                $r .= $a;
-            }
+            $r .= $a;
+        }
         return $r;
     }
 
@@ -286,7 +286,8 @@ class Helper
         foreach ($month_numbers as $month)
             $english_months[] = strftime('%B', mktime(0, 0, 0, $month, 1, 2011));
 
-        setlocale(LC_ALL, $setlocale); foreach ($month_numbers as $month)
+        setlocale(LC_ALL, $setlocale);
+        foreach ($month_numbers as $month)
             $foreign_months[] = strftime('%B', mktime(0, 0, 0, $month, 1, 2011));
 
         return str_replace($foreign_months, $english_months, $foreignMonthName);
@@ -856,8 +857,7 @@ class Helper
         $pds = array('second', 'minute', 'hour', 'day', 'week', 'month', 'year', 'decade');
         $lngh = array(1, 60, 3600, 86400, 604800, 2630880, 31570560, 315705600);
 
-        for ($v = sizeof($lngh) - 1; ($v >= 0) && (($no = $dif / $lngh[$v]) <= 1); $v--)
-            ;
+        for ($v = sizeof($lngh) - 1; ($v >= 0) && (($no = $dif / $lngh[$v]) <= 1); $v--);
         if ($v < 0)
             $v = 0;
         $_tm = $cur_tm - ($dif % $lngh[$v]);
@@ -1721,12 +1721,12 @@ class Helper
     }
 
     /**
-    * Get php://input as array, and merge $_REQUEST if mapping on.
+     * Get php://input as array, and merge $_REQUEST if mapping on.
     
-    * @param bool $map
-    * 
-    * @return [type]
-    */
+     * @param bool $map
+     * 
+     * @return [type]
+     */
     public static function retrieveJsonPostData($map = false)
     {
         $rawData = file_get_contents("php://input");
@@ -1960,9 +1960,9 @@ class Helper
      */
     static public function repeat()
     {
-        ?>
-                                                                                                                                                                                                                                                                                window.location.reload();
-                                                                                                                                                                                                                                                                        <?php
+?>
+        window.location.reload();
+<?php
     }
 
 
@@ -2098,7 +2098,8 @@ class Helper
             $d = new $class();
 
             foreach ($kv as $k => $v)
-                $d->$k = $v; foreach ($attributes as $k => $v)
+                $d->$k = $v;
+            foreach ($attributes as $k => $v)
                 $d->$k = $v;
             try {
                 $d->save();
@@ -2546,10 +2547,10 @@ class Helper
         $str = strtr(
             $str,
             "\xE1\xE8\xEF\xEC\xE9\xED\xF2\xF3\xF8\x9A\x9D\xF9\xFA\xFD\x9E\xF4\xBC" .
-            "\xBE\xC1\xC8\xCF\xCC\xC9\xCD\xC2\xD3\xD8\x8A\x8D\xDA\xDD\x8E\xD2\xD9\xEF\xCF",
+                "\xBE\xC1\xC8\xCF\xCC\xC9\xCD\xC2\xD3\xD8\x8A\x8D\xDA\xDD\x8E\xD2\xD9\xEF\xCF",
 
             "\x61\x63\x64\x65\x65\x69\x6E\x6F\x72\x73\x74\x75\x75\x79\x7A\x6F\x4C" .
-            "\x6C\x41\x43\x44\x45\x45\x49\x4E\x4F\x52\x53\x54\x55\x59\x5A\x4E\x55\x64\x44"
+                "\x6C\x41\x43\x44\x45\x45\x49\x4E\x4F\x52\x53\x54\x55\x59\x5A\x4E\x55\x64\x44"
         );
 
         $str = strtr(
@@ -3238,7 +3239,8 @@ class Helper
         if (isset($arr) && is_array($arr)) {
             foreach ($keys as $u)
                 if (isset($arr[$u]))
-                    unset($arr[$u]); foreach ($arr as $k => $v) {
+                    unset($arr[$u]);
+            foreach ($arr as $k => $v) {
                 if (is_array($v))
                     foreach ($keys as $u)
                         if (isset($v[$u]))
@@ -3705,8 +3707,7 @@ class Helper
             foreach ($supported_languages as $language) {
                 $counter[$language] = $counter[$language] +
                     // I believe this is way faster than fancy RegEx solutions
-                    substr_count($text, ' ' . $wordList[$language][$i] . ' ');
-                ;
+                    substr_count($text, ' ' . $wordList[$language][$i] . ' ');;
             }
         }
         // get max counter value
@@ -3920,15 +3921,15 @@ class Helper
             case JSON_ERROR_SYNTAX:
                 $error = 'Syntax error, malformed JSON.';
                 break;
-            // PHP >= 5.3.3
+                // PHP >= 5.3.3
             case JSON_ERROR_UTF8:
                 $error = 'Malformed UTF-8 characters, possibly incorrectly encoded.';
                 break;
-            // PHP >= 5.5.0
+                // PHP >= 5.5.0
             case JSON_ERROR_RECURSION:
                 $error = 'One or more recursive references in the value to be encoded.';
                 break;
-            // PHP >= 5.5.0
+                // PHP >= 5.5.0
             case JSON_ERROR_INF_OR_NAN:
                 $error = 'One or more NAN or INF values in the value to be encoded.';
                 break;
@@ -3983,15 +3984,15 @@ class Helper
             case JSON_ERROR_SYNTAX:
                 $error = 'Syntax error, malformed JSON.';
                 break;
-            // PHP >= 5.3.3
+                // PHP >= 5.3.3
             case JSON_ERROR_UTF8:
                 $error = 'Malformed UTF-8 characters, possibly incorrectly encoded.';
                 break;
-            // PHP >= 5.5.0
+                // PHP >= 5.5.0
             case JSON_ERROR_RECURSION:
                 $error = 'One or more recursive references in the value to be encoded.';
                 break;
-            // PHP >= 5.5.0
+                // PHP >= 5.5.0
             case JSON_ERROR_INF_OR_NAN:
                 $error = 'One or more NAN or INF values in the value to be encoded.';
                 break;
@@ -4238,7 +4239,7 @@ class Helper
      * @param bool $convert Whether to convert the values to their specified data types.
      * @return array The merged array of default values and options.
      */
-    public static function parameters($defaults, $options = null, $convert=true)
+    public static function parameters($defaults, $options = null, $convert = true)
     {
         $result = array();
         if (is_null($options))
@@ -4246,7 +4247,7 @@ class Helper
         foreach ($defaults as $k => $v) {
             if (isset($options[$k])) {
                 $value = $options[$k];
-                if ($convert) { 
+                if ($convert) {
                     if (is_object($v)) {
                         // nothing.
                     } else if (is_array($v)) {
@@ -4266,6 +4267,21 @@ class Helper
         return $result;
     }
 
-
-
+    /**
+     * Extracts links from HTML and returns an array of link data.
+     *
+     * @param string $html The HTML string to extract links from.
+     * @return array An array of arrays, where each inner array contains the link URL and link text.
+     */
+        function linkExtractor($html)
+        {
+            $linkArray = array();
+            if (preg_match_all('/<a\s+.*?href=[\"\']?([^\"\' >]*)[\"\']?[^>]*>(.*?)<\/a>/i', $html, $matches, PREG_SET_ORDER)) {
+                foreach ($matches as $match) {
+                    array_push($linkArray, array($match[1], $match[2]));
+                }
+            }
+            return $linkArray;
+        }
+    
 }

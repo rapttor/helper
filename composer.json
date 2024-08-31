@@ -49,9 +49,5 @@
       "src/Helper.php"
       
     ]
-  },
-  "replace": {
-    "rapttor/helper": "self.version"
-    
   }
 }
