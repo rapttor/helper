@@ -1,4 +1,5 @@
-<?php  // ﷽
+<?php
+// ﷽
 // declare(strict_types = 1);
 
 namespace RapTToR;
@@ -2111,9 +2112,9 @@ if (!class_exists(__NAMESPACE__ . '\Helper')) {
         public function YesNo()
         {
             return array(
-                -1 => Helper::t('front', 'No'),
-                0 => Helper::t('front', 'Not set'),
-                1 => Helper::t('front', 'Yes'),
+                -1 => \RapTToR\Helper::t('front', 'No'),
+                0 => \RapTToR\Helper::t('front', 'Not set'),
+                1 => \RapTToR\Helper::t('front', 'Yes'),
             );
         }
 
@@ -2266,8 +2267,8 @@ if (!class_exists(__NAMESPACE__ . '\Helper')) {
             $new = array();
             if (isset($a) && is_array($a))
                 foreach ($a as $v) {
-                    $a[Helper::aVal($v, 'name')] = Helper::aVal($v, 'value');
-                    $new[Helper::aVal($v, 'name')] = Helper::aVal($v, 'value');
+                    $a[\RapTToR\Helper::aVal($v, 'name')] = \RapTToR\Helper::aVal($v, 'value');
+                    $new[\RapTToR\Helper::aVal($v, 'name')] = \RapTToR\Helper::aVal($v, 'value');
                 }
             return ($onlynew) ? $new : $a;
         }
