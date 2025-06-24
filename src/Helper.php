@@ -1992,18 +1992,6 @@ if (!class_exists(__NAMESPACE__ . '\Helper')) {
         }
 
         /**
-         * @param mixed $bucketid
-         * @param mixed $where
-         *
-         * @return [type]
-         */
-        public static function s3download($bucketid, $where)
-        {
-            $cmd = "aws s3 sync s3://$bucketid $where";
-            return array('cmd' => $cmd, 'result' => self::exec($cmd));
-        }
-
-        /**
          * @param $pass
          * @return string
          */
@@ -2116,22 +2104,6 @@ if (!class_exists(__NAMESPACE__ . '\Helper')) {
                 0 => \RapTToR\Helper::t('front', 'Not set'),
                 1 => \RapTToR\Helper::t('front', 'Yes'),
             );
-        }
-
-        /**
-         * @param mixed $cmd
-         *
-         * @return [type]
-         */
-        public static function exec($cmd)
-        {
-            $result = array();
-            $cmd = escapeshellcmd($cmd);
-            ob_start();
-            $result['output'] = shell_exec($cmd);
-            $result['content'] = ob_get_contents();
-            ob_end_clean();  // Use this instead of ob_flush()
-            return $result;
         }
 
         /**
